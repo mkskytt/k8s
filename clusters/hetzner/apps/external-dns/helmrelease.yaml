@@ -25,7 +25,9 @@ spec:
     provider: cloudflare
     domainFilters:
       - "demajo.io"
-    cloudflare:
-      apiTokenSecretRef:
-        name: cloudflare-api-token
-        key: api-token
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: api-token
