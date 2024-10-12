@@ -25,6 +25,8 @@ spec:
     provider: cloudflare
     domainFilters:
       - "demajo.io"
+    sources:
+      - service
     env:
       - name: CF_API_TOKEN
         valueFrom:
