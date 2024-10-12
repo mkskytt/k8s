@@ -27,5 +27,5 @@ spec:
       - "demajo.io"
     cloudflare:
       apiTokenSecretRef:
-        name: cloudflare-api-key
+        name: cloudflare-api-token
         key: apiKey
