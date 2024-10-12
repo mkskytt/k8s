@@ -35,4 +35,3 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: dapr
-      version: 1.1.4
