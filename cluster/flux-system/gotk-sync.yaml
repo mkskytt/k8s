@@ -10,7 +10,7 @@ spec:
     branch: main
   secretRef:
     name: flux-system
-  url: ssh://git@github.com/Demajos/k8s
+  url: ssh://git@github.com/mkskytt/k8s
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -18,8 +18,8 @@ metadata:
   name: flux-system
   namespace: flux-system
 spec:
-  interval: 10m0s
-  path: ./clusters/hetzner
+  interval: 1m0s
+  path: ./cluster
   prune: true
   sourceRef:
     kind: GitRepository
