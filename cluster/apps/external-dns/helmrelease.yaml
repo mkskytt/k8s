@@ -24,7 +24,7 @@ spec:
   values:
     provider: cloudflare
     domainFilters:
-      - "demajo.io"
+      - "mkskytt.dev"
     sources:
       - ingress
     env:
@@ -32,4 +32,4 @@ spec:
         valueFrom:
           secretKeyRef:
             name: cloudflare-api-token
-            key: apiKey
+            key: api-token

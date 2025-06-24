@@ -4,7 +4,7 @@ metadata:
     name: cloudflare-api-token
     namespace: external-dns
 stringData:
-    apiKey: ENC[AES256_GCM,data:0rJuf3yFnfcyslGXI+St0JoFjq6rKfPYBj4fK902tF7NSeSl1NRBsg==,iv:pmv47IwKOPKfh+mSmlgTQ8O8mcm52mOWjeBnnDF9wsI=,tag:Ky49hwzXOQ3sS0rwQMZTmQ==,type:str]
+    api-token: ENC[AES256_GCM,data:0rJuf3yFnfcyslGXI+St0JoFjq6rKfPYBj4fK902tF7NSeSl1NRBsg==,iv:pmv47IwKOPKfh+mSmlgTQ8O8mcm52mOWjeBnnDF9wsI=,tag:Ky49hwzXOQ3sS0rwQMZTmQ==,type:str]
 sops:
     age:
         - recipient: age1zcjghufxqnfwa20vngfcqls066p3cu0xnnglthsa9p5rqpjfwqdq37gqep
