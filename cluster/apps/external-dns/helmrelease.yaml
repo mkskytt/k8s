@@ -32,4 +32,4 @@ spec:
         valueFrom:
           secretKeyRef:
             name: cloudflare-api-token
-            key: api-token
+            key: apiKey
