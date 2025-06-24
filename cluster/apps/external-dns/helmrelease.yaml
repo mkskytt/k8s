@@ -31,5 +31,5 @@ spec:
       - name: CF_API_TOKEN
         valueFrom:
           secretKeyRef:
-            name: cloudflare-api-token
-            key: api-token
+            name: cloudflare-api-key
+            key: apiKey
