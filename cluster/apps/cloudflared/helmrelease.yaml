@@ -33,6 +33,8 @@ spec:
     # Tunnel routing configuration - direct to services
     tunnel:
       ingress:
+        - hostname: "demo.k8s.mkskytt.dev"
+          service: "http://demo-app.demo-app.svc.cluster.local:9898"
         - hostname: "app.k8s.mkskytt.dev"
           service: "http://my-app-service.default.svc.cluster.local:80"
         - hostname: "api.k8s.mkskytt.dev"
