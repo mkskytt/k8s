@@ -5,18 +5,18 @@ metadata:
     namespace: external-dns
 type: Opaque
 stringData:
-    token: ENC[AES256_GCM,data:7NYOqRhG41Tf88KgzeUbA9kw9lNmIK5TRbOoHUOntb+1sW3P8WOB0w==,iv:CAeE4FU7TajDqokyAOu8IxL/XCQMExBURBaX0ZVPJRQ=,tag:X1kCc/EOw8xc3WyT10tECQ==,type:str]
+    apiKey: ENC[AES256_GCM,data:7NYOqRhG41Tf88KgzeUbA9kw9lNmIK5TRbOoHUOntb+1sW3P8WOB0w==,iv:CAeE4FU7TajDqokyAOu8IxL/XCQMExBURBaX0ZVPJRQ=,tag:X1kCc/EOw8xc3WyT10tECQ==,type:str]
 sops:
     age:
         - recipient: age1zcjghufxqnfwa20vngfcqls066p3cu0xnnglthsa9p5rqpjfwqdq37gqep
           enc: |
-            -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTTEJVUndNY0d1a3lqNmNl
-            aWl0dFBiLzBEMVByY1BZY2V1Tno3VTRSUHpzCjNJRmpkeVJjeHhUR0tVMVlKOGxs
-            d2Z3L2cwdXoyTmV6NDFKVDdMRWFnU3MKLS0tIDdORXkrR0NDeEJ3SWRFOHdhelVu
-            TGZUaFdUeFBhdmsvclhQb1lhVE8vQjAKTtt5LK8Yxmj+7FPPpqk9yUAnzYkiTNQY
-            VzXjKv8jj05bnYsGpxbpI8/i3Lx2nnldqMbrg37WQsHWLdBbyS5PpQ==
-            -----END AGE ENCRYPTED FILE-----
+              -----BEGIN AGE ENCRYPTED FILE-----
+              YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBTTEJVUndNY0d1a3lqNmNl
+              aWl0dFBiLzBEMVByY1BZY2V1Tno3VTRSUHpzCjNJRmpkeVJjeHhUR0tVMVlKOGxs
+              d2Z3L2cwdXoyTmV6NDFKVDdMRWFnU3MKLS0tIDdORXkrR0NDeEJ3SWRFOHdhelVu
+              TGZUaFdUeFBhdmsvclhQb1lhVE8vQjAKTtt5LK8Yxmj+7FPPpqk9yUAnzYkiTNQY
+              VzXjKv8jj05bnYsGpxbpI8/i3Lx2nnldqMbrg37WQsHWLdBbyS5PpQ==
+              -----END AGE ENCRYPTED FILE-----
     lastmodified: "2025-06-25T08:16:46Z"
     mac: ENC[AES256_GCM,data:36Ymx8ehuc+935JfvvZIL4B85DMJUT8HmAeUe2tCj1wfv6kdG4pC2uewzMdTL4RMj6ykt4xuwVFcQGGDoyk3d+EoseXdmgW6MZGNovP916f3s1iR9w1sbgkunEU9yMOOmRBTaMA7Rx87kqIOK4fsBmSTzrR7k/rN3QU+D15WMp0=,iv:bKAMmAtGb7KEUrTzs3snKuK1/i6mxg5rAAoNhHIPS5E=,tag:3TZQeeVf32aaElXr4QxYXQ==,type:str]
     encrypted_regex: ^(data|stringData)$
