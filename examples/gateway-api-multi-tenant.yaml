@@ -28,6 +28,33 @@ spec:
         namespace: default
 
 ---
+# Service to expose the Gateway for cloudflared tunnel access
+# This service provides the endpoint that cloudflared expects to route traffic to
+apiVersion: v1
+kind: Service
+metadata:
+  name: cilium-gateway-main-gateway
+  namespace: default
+  labels:
+    app.kubernetes.io/name: cilium-gateway
+    gateway.networking.k8s.io/gateway-name: main-gateway
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    # These labels should match the Cilium Gateway proxy pods
+    app.kubernetes.io/name: cilium-gateway
+    io.cilium.gateway/owning-gateway: default/main-gateway
+
+---
 # Application Routes
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
