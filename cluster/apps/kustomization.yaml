@@ -4,3 +4,5 @@ resources:
 - external-dns
 - cloudflared
 - cilium
+- services.yaml
+- tunnel-dns.yaml

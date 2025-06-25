@@ -29,6 +29,7 @@ spec:
       - "mkskytt.dev"
     sources:
       - ingress
+      - service
     env:
       - name: CF_API_TOKEN
         valueFrom:
