@@ -33,6 +33,10 @@ Customer domains use CNAME records to point to your infrastructure domains:
    ```bash
    kubectl apply -f gateway-api-multi-tenant.yaml
    ```
+   This creates:
+   - The main Gateway resource with Cilium Gateway API
+   - A service named `cilium-gateway-main-gateway` for cloudflared tunnel access
+   - HTTPRoute configurations for multi-tenant routing
 
 2. **Deploy example services**:
    ```bash

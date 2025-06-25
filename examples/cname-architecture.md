@@ -37,6 +37,17 @@ In your Cloudflare dashboard, configure a wildcard route:
 |-----------|--------|--------------|-----|
 | * | k8s.mkskytt.dev | HTTP | http://cilium-gateway-main-gateway.default.svc.cluster.local:80 |
 
+### Service Configuration Note
+
+The `cilium-gateway-main-gateway` service is created in the Gateway API configuration to expose the Cilium Gateway for external access. This service:
+
+- Provides the endpoint that cloudflared tunnel connects to
+- Routes traffic to the Cilium Gateway proxy pods 
+- Uses selectors to automatically target the correct Gateway infrastructure
+- Enables cloudflared to reach the Gateway API from outside the cluster
+
+Without this service, cloudflared would not be able to route traffic to the Gateway, even though the Gateway itself is properly configured.
+
 ## Gateway API Benefits
 
 ✅ **Modern Kubernetes standard** - Future-proof API

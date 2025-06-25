@@ -50,7 +50,8 @@ spec:
     targetPort: 8443
     protocol: TCP
   selector:
-    # These labels should match the Cilium Gateway proxy pods
+    # These labels match the Cilium Gateway proxy pods for this specific gateway
+    # Cilium Gateway API creates pods with these labels for each Gateway resource
     app.kubernetes.io/name: cilium-gateway
     io.cilium.gateway/owning-gateway: default/main-gateway
 
