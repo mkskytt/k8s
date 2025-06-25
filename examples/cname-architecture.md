@@ -1,7 +1,7 @@
-# CNAME Architecture with Cilium Gateway API
+# CNAME Architecture with Direct Service Routing
 
 ## Overview
-This setup uses Kubernetes Gateway API with Cilium to provide customers with their own domains while maintaining centralized infrastructure.
+This setup uses direct service routing with cloudflared tunnels to provide customers with their own domains while maintaining centralized infrastructure. Traffic flows directly from cloudflared to individual Kubernetes services without an ingress controller layer.
 
 ## Architecture
 
@@ -31,31 +31,23 @@ dashboard.myapp.com     CNAME → dashboard.k8s.mkskytt.dev
 
 ## Cloudflare Tunnel Configuration
 
-In your Cloudflare dashboard, configure a wildcard route:
+In your Cloudflare dashboard, configure separate routes for each service:
 
 | Subdomain | Domain | Service Type | URL |
 |-----------|--------|--------------|-----|
-| * | k8s.mkskytt.dev | HTTP | http://cilium-gateway-main-gateway.default.svc.cluster.local:80 |
+| app | k8s.mkskytt.dev | HTTP | http://my-app-service.default.svc.cluster.local:80 |
+| api | k8s.mkskytt.dev | HTTP | http://my-api-service.default.svc.cluster.local:8080 |
+| dashboard | k8s.mkskytt.dev | HTTP | http://dashboard-service.default.svc.cluster.local:3000 |
+| hubble | k8s.mkskytt.dev | HTTP | http://hubble-ui.kube-system.svc.cluster.local:80 |
 
-### Service Configuration Note
+## Direct Service Routing Benefits
 
-The `cilium-gateway-main-gateway` service is created in the Gateway API configuration to expose the Cilium Gateway for external access. This service:
-
-- Provides the endpoint that cloudflared tunnel connects to
-- Routes traffic to the Cilium Gateway proxy pods 
-- Uses selectors to automatically target the correct Gateway infrastructure
-- Enables cloudflared to reach the Gateway API from outside the cluster
-
-Without this service, cloudflared would not be able to route traffic to the Gateway, even though the Gateway itself is properly configured.
-
-## Gateway API Benefits
-
-✅ **Modern Kubernetes standard** - Future-proof API
-✅ **Rich traffic management** - Advanced routing, filters, policies
-✅ **Multi-protocol support** - HTTP, HTTPS, TCP, UDP
-✅ **Vendor neutral** - Portable across different implementations
-✅ **Extensible** - Custom filters and policies
-✅ **Type-safe configuration** - Strong API contracts
+✅ **Simplified architecture** - No ingress controller layer
+✅ **Direct traffic flow** - Reduced latency and complexity  
+✅ **Per-service control** - Individual routing configuration
+✅ **Easy debugging** - Clear traffic path from tunnel to service
+✅ **Flexible scaling** - Services can be scaled independently
+✅ **Resource efficient** - No additional ingress controller resources
 
 ## Benefits
 
@@ -76,7 +68,7 @@ To set up a custom domain, customers need to:
    dashboard.myapp.com CNAME   dashboard.k8s.mkskytt.dev
    ```
 
-2. **Notify you** to add their domain to the HTTPRoute hostnames
+2. **Notify you** to add new cloudflared tunnel routes for their domain
 
 3. **Wait for DNS propagation** (usually 5-60 minutes)
 
@@ -86,29 +78,38 @@ To set up a custom domain, customers need to:
    curl -v https://api.myapp.com
    ```
 
-## Gateway API Configuration
+## Service Routing Configuration
 
-Example HTTPRoute for new customer:
+With direct service routing, cloudflared handles hostname-based routing. Customer CNAMEs point to your infrastructure domains, and cloudflared routes each subdomain to the appropriate service:
+
 ```yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
+# Example services that cloudflared routes to:
+apiVersion: v1
+kind: Service
 metadata:
-  name: app-routes
+  name: my-app-service
 spec:
-  parentRefs:
-  - name: main-gateway
-  hostnames:
-  - "app.k8s.mkskytt.dev"
-  - "myapp.com"          # Add customer domain here
-  - "newcustomer.io"     # Add new customer domains
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: my-app-service
-      port: 80
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: v1  
+kind: Service
+metadata:
+  name: my-api-service
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service  
+metadata:
+  name: dashboard-service
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
 ```
 
 ## Hubble Observability

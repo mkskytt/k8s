@@ -9,7 +9,7 @@ This directory contains examples for a multi-tenant Kubernetes setup using:
 ## Architecture
 
 ```
-Internet → Cloudflare → Tunnel → Gateway API → Services
+Internet → Cloudflare → Tunnel → Services (Direct)
 ```
 
 Customer domains use CNAME records to point to your infrastructure domains:
@@ -19,9 +19,10 @@ Customer domains use CNAME records to point to your infrastructure domains:
 ## Files
 
 ### Core Configuration
-- `gateway-api-multi-tenant.yaml` - Main Gateway and HTTPRoute configurations
+- `direct-service-routing.yaml` - Main configuration for direct service routing
 - `example-services.yaml` - Sample application deployments and services
 - `tls-configuration.yaml` - SSL/TLS certificate management
+- `gateway-api-multi-tenant-alternative.yaml` - Alternative Gateway API approach
 
 ### Documentation
 - `cname-architecture.md` - Overview of the CNAME-based multi-tenant setup
@@ -29,26 +30,22 @@ Customer domains use CNAME records to point to your infrastructure domains:
 
 ## Quick Start
 
-1. **Deploy the Gateway and HTTPRoutes**:
+1. **Deploy the direct service routing configuration**:
    ```bash
-   kubectl apply -f gateway-api-multi-tenant.yaml
+   kubectl apply -f direct-service-routing.yaml
    ```
-   This creates:
-   - The main Gateway resource with Cilium Gateway API
-   - A service named `cilium-gateway-main-gateway` for cloudflared tunnel access
-   - HTTPRoute configurations for multi-tenant routing
 
 2. **Deploy example services**:
    ```bash
    kubectl apply -f example-services.yaml
    ```
 
-3. **Configure Cloudflare tunnel** to route `*.k8s.mkskytt.dev` to:
-   ```
-   http://cilium-gateway-main-gateway.default.svc.cluster.local:80
-   ```
+3. **Configure Cloudflare tunnel** to route directly to services:
+   - App: `app.k8s.mkskytt.dev` → `http://my-app-service.default.svc.cluster.local:80`
+   - API: `api.k8s.mkskytt.dev` → `http://my-api-service.default.svc.cluster.local:8080`
+   - Dashboard: `dashboard.k8s.mkskytt.dev` → `http://dashboard-service.default.svc.cluster.local:3000`
 
-4. **Access Hubble UI** at `https://hubble.k8s.mkskytt.dev`
+4. **Access Hubble UI** via direct service routing at `https://hubble.k8s.mkskytt.dev`
 
 ## Adding New Customer Domains
 
@@ -57,13 +54,9 @@ To add a new customer domain `newcustomer.com`:
 1. **Customer creates CNAME**:
    ```
    newcustomer.com  CNAME  app.k8s.mkskytt.dev
+   api.newcustomer.com  CNAME  api.k8s.mkskytt.dev
    ```
 
-2. **Add to HTTPRoute**:
-   ```yaml
-   hostnames:
-   - "app.k8s.mkskytt.dev"
-   - "newcustomer.com"  # Add here
-   ```
+2. **Configure cloudflared tunnel** to handle the new domains (they will automatically route to the same services)
 
 3. **Monitor in Hubble** to see traffic flows
