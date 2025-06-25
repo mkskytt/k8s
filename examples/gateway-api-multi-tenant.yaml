@@ -1,0 +1,168 @@
+---
+# Gateway API Configuration for Multi-Tenant CNAME Architecture
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main-gateway
+  namespace: default
+  annotations:
+    # External-DNS will create DNS records for k8s.mkskytt.dev domains
+    external-dns.alpha.kubernetes.io/hostname: "*.k8s.mkskytt.dev"
+spec:
+  gatewayClassName: cilium
+  listeners:
+  # HTTP listener for all domains (both primary and CNAME)
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "*"  # Accept all hostnames (primary and customer CNAMEs)
+  # HTTPS listener for all domains  
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: "*"
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: wildcard-k8s-mkskytt-dev-tls
+        namespace: default
+
+---
+# Application Routes
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app-routes
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+  hostnames:
+  - "app.k8s.mkskytt.dev"    # Primary domain (external-dns managed)
+  - "myapp.com"              # Customer CNAME
+  - "acme-corp.com"          # Another customer CNAME
+  - "startup-xyz.io"         # Another customer CNAME
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: my-app-service
+      port: 80
+      weight: 100
+    filters:
+    # Add security headers
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: "X-Frame-Options"
+          value: "DENY"
+        - name: "X-Content-Type-Options"
+          value: "nosniff"
+        - name: "X-XSS-Protection"
+          value: "1; mode=block"
+        - name: "Referrer-Policy"
+          value: "strict-origin-when-cross-origin"
+
+---
+# API Routes
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-routes
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+  hostnames:
+  - "api.k8s.mkskytt.dev"    # Primary domain (external-dns managed)
+  - "api.myapp.com"          # Customer CNAME
+  - "api.acme-corp.com"      # Another customer CNAME
+  - "api.startup-xyz.io"     # Another customer CNAME
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: my-api-service
+      port: 8080
+      weight: 100
+    filters:
+    # API-specific headers
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: "Access-Control-Allow-Origin"
+          value: "*"
+        - name: "Access-Control-Allow-Methods"
+          value: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+        - name: "Access-Control-Allow-Headers"
+          value: "Content-Type,Authorization,X-Requested-With"
+        - name: "Access-Control-Max-Age"
+          value: "86400"
+
+---
+# Dashboard Routes
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dashboard-routes
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+  hostnames:
+  - "dashboard.k8s.mkskytt.dev"   # Primary domain (external-dns managed)
+  - "dashboard.myapp.com"         # Customer CNAME
+  - "dashboard.acme-corp.com"     # Another customer CNAME
+  - "admin.startup-xyz.io"        # Customer can use different subdomain
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: dashboard-service
+      port: 3000
+      weight: 100
+    filters:
+    # Dashboard security headers
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: "X-Frame-Options"
+          value: "SAMEORIGIN"
+        - name: "Content-Security-Policy"
+          value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+
+---
+# Hubble UI Routes (Internal monitoring)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hubble-ui-routes
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+  hostnames:
+  - "hubble.k8s.mkskytt.dev"    # Internal monitoring domain
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: hubble-ui
+      namespace: kube-system
+      port: 80
+      weight: 100
+    filters:
+    # Restrict access to internal IPs only (optional)
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: "X-Robots-Tag"
+          value: "noindex, nofollow"

@@ -1,0 +1,30 @@
+---
+# TLS Certificate for k8s.mkskytt.dev (wildcard)
+# This can be managed by cert-manager or provided manually
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wildcard-k8s-mkskytt-dev-tls
+  namespace: default
+type: kubernetes.io/tls
+data:
+  # These would be base64 encoded certificate and key
+  # You can use cert-manager to automatically provision these
+  tls.crt: LS0tLS1CRUdJTi... # Base64 encoded certificate
+  tls.key: LS0tLS1CRUdJTi... # Base64 encoded private key
+
+---
+# Cert-manager Certificate for automatic TLS (optional)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-k8s-mkskytt-dev
+  namespace: default
+spec:
+  secretName: wildcard-k8s-mkskytt-dev-tls
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  dnsNames:
+  - "*.k8s.mkskytt.dev"
+  - "k8s.mkskytt.dev"

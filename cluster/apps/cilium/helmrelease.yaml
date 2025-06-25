@@ -1,0 +1,92 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  url: https://helm.cilium.io/
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: cilium
+      version: 1.16.5
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: kube-system
+  values:
+    # Gateway API (preferred modern approach)
+    gatewayAPI:
+      enabled: true
+    
+    # Disable traditional ingress controller since we're using Gateway API
+    ingressController:
+      enabled: false
+    
+    # Enable Hubble for comprehensive observability
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+        rollOutPods: true
+      ui:
+        enabled: true
+        rollOutPods: true
+        service:
+          type: ClusterIP
+        ingress:
+          enabled: false  # We'll create our own Gateway for Hubble UI
+      metrics:
+        enabled:
+          - dns:query
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - http
+    
+    # Enable Layer 7 proxy features for Gateway API
+    l7Proxy: true
+    
+    # Operator configuration
+    operator:
+      replicas: 1
+    
+    # Performance and security features
+    encryption:
+      enabled: false  # Enable if you want transparent encryption
+      type: wireguard
+    
+    # Routing configuration
+    routingMode: native
+    ipv4NativeRoutingCIDR: 10.0.0.0/8
+    
+    # Enable bandwidth manager for better performance
+    bandwidthManager:
+      enabled: true
+      bbr: true
+    
+    # Enable local redirect policy
+    localRedirectPolicy: true
+    
+    # Enable service mesh features
+    sockops:
+      enabled: true
+    
+    # Resource configuration
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 4Gi
+      requests:
+        cpu: 100m
+        memory: 512Mi
