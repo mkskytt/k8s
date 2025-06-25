@@ -5,19 +5,19 @@ metadata:
     namespace: external-dns
 type: Opaque
 stringData:
-    apiKey: ENC[AES256_GCM,data:FDUAld/7vaqYFfxYFlp+JjIGWqFmcGA8Wow5ECPeV5fTMhXS3oC6Xw==,iv:0ldyLsbVFlT+I7ajPmusQ7AH0CcY6dE4veb5a9OaT+U=,tag:06DOk3HA/4um9XF/pfmn5w==,type:str]
+    apiKey: ENC[AES256_GCM,data:qZoKiMDAumL3arEi4W9gnUfu1X5O0KnYiaJp5/NycLxAIGJvlNVYhA==,iv:MI/1fNGr+nJUVaMHF7QAjY0ALrpOwItDyHIbzQ856sc=,tag:y0gmiK7FtK0/MRruDYEifg==,type:str]
 sops:
     age:
         - recipient: age1m6nfyxr0877qwk5kfylwh32mmrprew5qzdsp36lpd5ajl5keqgxszup6gv
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBPV20yWkJVUHc5OWFCbzdh
-            UUZlZkZOclc2MzdGOTFKMStCUzlEaXNoK1hBClM0M2REaDR2MzhmeU5YWkxScUtw
-            NW1VU2czeEh6TFhGS2haWDZPNzhvbkUKLS0tICtOVXJmMW9Qa2xrVHFPZWlweThI
-            QlVKTHY1YTJOcnI3TjZnWkN0dksxZTgKKILlXZNXq/w9g1n8dYmJ2pxw9mr1GuzN
-            SZOkSsKCYK17Kx+Nohj25YZ9IIZWaC1he9AhZUOnhx059uFXQdi63A==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAydUNyakhQbzdwaHdzUlFW
+            N3JYK3hmTnNnaWlqVFVEOXNxMVJjdC9xVGdVClhPeHVsZkpjNDRLMllQczBScHJH
+            Z1lERVEreWtVeTVnQ25aRnBEcXlPd0kKLS0tIDUrSUx6UDNJNVllbDdKZWN0VlFk
+            cVpRcjk4enp6dmorTTVFZE9WL2ZvMUkKNVLt4smszPrKre85NRR0+kR++zkGhYaW
+            PfkVET/h4GK5z33Jepwg9mjSNgBH1P0A9ZupjmXjuLtGtrTBp062kg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-06-25T12:32:45Z"
-    mac: ENC[AES256_GCM,data:iKn4K5gN1VYhlPKHXQ9WIhe40nt3lQDssEUXKfbYhO13o5zUXIigcxyzZWpiKWXLiZf1T0CL+SprYqgpwZV9peaHL12D54aZqaj3gJLcTujEDiSju1xt5Wh0vSX0BfgjrgbXkfIhSE6O1e2Gv/azO0dybVjFJ2On148iWXo/mwU=,iv:8dWubH/gMD8OUorPVQRx7WgRsUSa1CYiRJejAVAp8zM=,tag:jrNZYmCr3KokVb3rZrDlvA==,type:str]
+    lastmodified: "2025-06-25T12:40:44Z"
+    mac: ENC[AES256_GCM,data:iIdI030OxAQW7Gb1fIn9gyyog0hc+dmPDk2kLS6lRdi0lYLn/FwF5+3/aSnDt7fMe4Nqc/gI7VmyjVGou+QGjBS7KsXCHrPuujXb9ovmP77GkroMpvpozV8qW55Nh/CbADTchQJCPl6CKp/zh65WYzPITS7NuYg1Fr72kbUoUUk=,iv:0NcoM62N1st589LzlpvKMkrGpFbPcpqdQBwe0Eo8jVw=,tag:SpkN+Za4xI/PTrYkFV7liA==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2
