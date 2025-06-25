@@ -30,6 +30,20 @@ spec:
         existingSecret: cloudflare-tunnel-token
         key: tunnel-token
 
+    # Tunnel routing configuration - direct to services
+    tunnel:
+      ingress:
+        - hostname: "app.k8s.mkskytt.dev"
+          service: "http://my-app-service.default.svc.cluster.local:80"
+        - hostname: "api.k8s.mkskytt.dev"
+          service: "http://my-api-service.default.svc.cluster.local:8080"
+        - hostname: "dashboard.k8s.mkskytt.dev"
+          service: "http://dashboard-service.default.svc.cluster.local:3000"
+        - hostname: "hubble.k8s.mkskytt.dev"
+          service: "http://hubble-ui.kube-system.svc.cluster.local:80"
+        # Catch-all rule (required by cloudflared)
+        - service: "http_status:404"
+
     # Deployment configuration
     replicaCount: 2
 

@@ -1,5 +1,15 @@
 ---
-# Gateway API Configuration for Multi-Tenant CNAME Architecture
+# ALTERNATIVE: Gateway API Configuration for Multi-Tenant CNAME Architecture
+# This file provides an alternative approach using Kubernetes Gateway API with Cilium
+# For the recommended direct service routing approach, use direct-service-routing.yaml instead
+#
+# This Gateway API approach provides:
+# - Advanced routing and traffic management
+# - Built-in SSL termination
+# - Rich filtering and policy capabilities
+# - Vendor-neutral configuration
+#
+# However, it requires additional infrastructure (Gateway controller) and complexity
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
