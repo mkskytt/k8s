@@ -30,6 +30,8 @@ spec:
     sources:
       - ingress
       - service
+    cloudflare:
+      proxied: true  # Default all records to proxied (orange cloud)
     env:
       - name: CF_API_TOKEN
         valueFrom:
