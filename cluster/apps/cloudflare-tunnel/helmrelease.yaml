@@ -17,17 +17,17 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: cloudflared
-      version: "0.9.0"
+      chart: cloudflare-tunnel
+      version: "0.3.2"
       sourceRef:
         kind: HelmRepository
         name: cloudflare
         namespace: cloudflare-tunnel
   values:
-    cloudflared:
-      token:
-        existingSecret: cloudflare-tunnel-token
-        existingSecretKey: token
+    cloudflare:
+      secretName: cloudflare-tunnel-token
+      tunnelName: k8s
+      tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
     replicaCount: 2
     resources:
       requests:
@@ -38,8 +38,7 @@ spec:
         memory: 128Mi
     podSecurityContext:
       runAsNonRoot: true
-      runAsUser: 65534
-      runAsGroup: 65534
+      runAsUser: 65532
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
