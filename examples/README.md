@@ -27,7 +27,6 @@ Customer domains use CNAME records to point to your infrastructure domains:
 ### Documentation
 - `cname-architecture.md` - Overview of the CNAME-based multi-tenant setup
 - `hubble-observability.md` - Comprehensive guide to network monitoring
-- `podinfo-demo.md` - Step-by-step guide for the podinfo demo application with Cloudflare Tunnel
 
 ## Quick Start
 
