@@ -28,6 +28,15 @@ spec:
       secretName: cloudflare-tunnel-token
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
+      ingress:
+        # Route demo.mkskytt.dev to the nginx demo service
+        - hostname: demo.mkskytt.dev
+          service: http://nginx-demo.demo-app.svc.cluster.local:80
+        # Catch-all for other subdomains - returns 404
+        - hostname: "*.mkskytt.dev"
+          service: http_status:404
+        # Default rule for any unmatched traffic
+        - service: http_status:404
     replicaCount: 2
     resources:
       requests:
