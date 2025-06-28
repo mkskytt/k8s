@@ -82,6 +82,7 @@ spec:
             defaultClusterId: k8s-cluster
           prometheus:
             existingSecretName: grafana-credentials
+            password_key: grafana-token
             external:
               url: https://prometheus-prod-22-prod-eu-west-3.grafana.net./api/prom
       kepler:
