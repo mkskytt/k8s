@@ -31,10 +31,11 @@ spec:
     destinations:
       - name: grafana-cloud-metrics
         type: prometheus
-        url: https://prometheus-prod-22-prod-eu-west-3.grafana.net/api/prom/push
+        url: https://prometheus-prod-22-prod-eu-west-3.grafana.net./api/prom/push
         auth:
-          type: bearerToken
-          bearerTokenKey: grafana-token
+          type: basic
+          username: "739035"
+          passwordKey: grafana-token
         secret:
           create: false
           name: grafana-credentials
@@ -42,10 +43,11 @@ spec:
 
       - name: grafana-cloud-logs
         type: loki
-        url: https://logs-prod-013.grafana.net/loki/api/v1/push
+        url: https://logs-prod-013.grafana.net./loki/api/v1/push
         auth:
-          type: bearerToken
-          bearerTokenKey: grafana-token
+          type: basic
+          username: "368487"
+          passwordKey: grafana-token
         secret:
           create: false
           name: grafana-credentials
@@ -53,11 +55,12 @@ spec:
 
       - name: grafana-cloud-otlp-endpoint
         type: otlp
-        url: https://otlp-gateway-prod-eu-west-3.grafana.net/otlp
+        url: https://otlp-gateway-prod-eu-west-3.grafana.net./otlp
         protocol: http
         auth:
-          type: bearerToken
-          bearerTokenKey: grafana-token
+          type: basic
+          username: "519124"
+          passwordKey: grafana-token
         secret:
           create: false
           name: grafana-credentials
@@ -72,7 +75,7 @@ spec:
     clusterMetrics:
       enabled: true
       opencost:
-        enabled: false
+        enabled: true
       kepler:
         enabled: true
 
