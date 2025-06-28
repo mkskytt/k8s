@@ -34,7 +34,7 @@ spec:
         url: https://prometheus-prod-22-prod-eu-west-3.grafana.net/api/prom/push
         auth:
           type: basic
-          username: "739035"
+          usernameKey: username
           passwordKey: grafana-token
         secret:
           create: false
@@ -46,7 +46,7 @@ spec:
         url: https://logs-prod-013.grafana.net/loki/api/v1/push
         auth:
           type: basic
-          username: "368487"
+          usernameKey: logs-username
           passwordKey: grafana-token
         secret:
           create: false
@@ -59,7 +59,7 @@ spec:
         protocol: http
         auth:
           type: basic
-          username: "519124"
+          usernameKey: otlp-username
           passwordKey: grafana-token
         secret:
           create: false
