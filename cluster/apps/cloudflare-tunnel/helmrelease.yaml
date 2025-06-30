@@ -18,7 +18,7 @@ spec:
   chart:
     spec:
       chart: cloudflare-tunnel
-      version: "0.3.2"
+      version: "0.4.0"
       sourceRef:
         kind: HelmRepository
         name: cloudflare
@@ -26,7 +26,6 @@ spec:
   values:
     cloudflare:
       secretName: cloudflare-tunnel-token
-      tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
       ingress:
         # Route demo.mkskytt.dev to the nginx demo service
@@ -48,4 +47,4 @@ spec:
       readOnlyRootFilesystem: true
       capabilities:
         drop:
-        - ALL
+          - ALL
