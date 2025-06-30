@@ -5,19 +5,19 @@ metadata:
     namespace: external-dns
 type: Opaque
 stringData:
-    apiKey: ENC[AES256_GCM,data:8d16LGeNPGrD2wCLPRvBOjGvvld2LJkUE7IpD3nF,iv:Qm6UYZJunz9/NQH3ogAItP2aQoiHSM0VvMSTMYvHnMU=,tag:BpJ6HKxtS9LumJXD+uv3eg==,type:str]
+    apiKey: ENC[AES256_GCM,data:gFqM21tEmGxybFm4kTD/6RixikfrGqP1Psb1c72Z5Lg9/CUJLgpYaA==,iv:tmkgr+YPkAoX3O0PulULpLn7g/sV9g/LMUmeIhknK+o=,tag:wxIuIKix34uEq+lcrT95Mg==,type:str]
 sops:
     age:
         - recipient: age1zcjghufxqnfwa20vngfcqls066p3cu0xnnglthsa9p5rqpjfwqdq37gqep
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBEYW5iV3JmRTlnRU1yL1Mv
-            WVlyVlI2Z0M5WTA2ekVobDhlaEV2UTM4R2xBCjZRb2JCa3dDWnFQTVVnRWtvMGVp
-            dkNBeUhRQkdQd2QrOFlpTjN6YU1SYWMKLS0tIG5BY3IrMG41cnlDeTUzY1RNbTlU
-            U1ZYbW9HUDdiYksxTmJ4dmJQOHVBeDgK4wql8v6BRWwQ93iwgejNOX7Q8zezZBOY
-            n+lr8zaHkug0pNNYpVhdI+EusviddvOjL5oH7+gzPnnHy6dh9qH1nw==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBYZFhyM0QxUGM0RnR3OHBD
+            STFiODAzWVhnbnBpQzAxYW93NlQwQzJVZTFBCllMVnNyWkg4UGw0KzFEbkYzTi95
+            R0lrbzluazNiTXI4WUcxNE92SkV2c1kKLS0tIDlONndmbXdpQ1JyVWFWL0ZGTTBo
+            dXlrNFpJVzN3eEltK0wwRVhpQUxRUUUKFwUqcS5GiUUyNzTzbu2bBMJ/UVI2ff2C
+            xiFIuAv1OojemxQoeAr5AMMseorFCAT6R4APPcBuDYMC4Ir6spGA3A==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-06-30T07:46:30Z"
-    mac: ENC[AES256_GCM,data:EBcY0xIKWmIQw85eBJNq1aFFZbqtLjGf2RJBSWnI9WgSMURCFrtYfUao3th9qQZZGUkNvJLWB8/dAa6KkSs0ZY0KAMqYnmKhS2ez9iIBo+cQ2vsYyVB6u2AY+FBknTglpYZJekFq03ZagTZg3JOiU8BZNWZJC7aXWyWJtN/TdBQ=,iv:u0fUin8qzLHqf0byHkdxCWmfG2rZlQRh5gqK26Pvonw=,tag:tHiRs8gmsLvkk9Gepzx5mg==,type:str]
+    lastmodified: "2025-06-30T08:05:37Z"
+    mac: ENC[AES256_GCM,data:F4ukJMyFbzOnsRKDW5fUjID53JY2xav351OPxUakA/s6IVlCokEk9wKm3UkLzZbm3FTopLY4q4J2yy/bMGF01HIftsyO4f5E5jIx/5IUzNbUStzdTNJarPdzH26v1l3r1CI6IQQ2LVGalOctYB+I/PsMLAkU/CEzZNA9ZGc5ugU=,iv:w2F4aOapKeLIZ0qw+U1aHdkHovXEWTAQLq4w5ZzycWE=,tag:iZJaRbB6X6VcLYBUiC1OKw==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2
