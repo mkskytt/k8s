@@ -27,10 +27,13 @@ spec:
     cloudflare:
       secretName: cloudflare-tunnel-token
       tunnel: k8s
-      ingress:
-        # Route demo.mkskytt.dev to the nginx demo service
-        - hostname: demo.mkskytt.dev
-          service: http://nginx-demo.demo-app.svc.cluster.local:80
+      config:
+        tunnel: k8s
+        credentials-file: /etc/cloudflared/creds/credentials.json
+        ingress:
+          # Route demo.mkskytt.dev to the nginx demo service
+          - hostname: demo.mkskytt.dev
+            service: http://nginx-demo.demo-app.svc.cluster.local:80
     replicaCount: 2
     resources:
       requests:
