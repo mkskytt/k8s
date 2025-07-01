@@ -1,7 +1,7 @@
 ---
 creation_rules:
-  - path_regex: .*\.sops\.yaml$
-    encrypted_regex: "^(data|stringData)$"
+  - path_regex: cluster/apps/.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
     age: age1zcjghufxqnfwa20vngfcqls066p3cu0xnnglthsa9p5rqpjfwqdq37gqep
 stores:
   yaml:
