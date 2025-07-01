@@ -1,0 +1,94 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+  annotations:
+    policies.kyverno.io/title: Require Labels
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Deployment
+    policies.kyverno.io/description: >-
+      Labels are a fundamental concept in Kubernetes for object organization and selection.
+      This policy requires that all Pods and Deployments have the required labels: 
+      'app', 'version', and 'environment'.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-required-labels
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - Deployment
+    validate:
+      message: "Missing required labels: app, version, environment"
+      pattern:
+        metadata:
+          labels:
+            app: "?*"
+            version: "?*"
+            environment: "?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-privileged-containers
+  annotations:
+    policies.kyverno.io/title: Restrict Privileged Containers
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Privileged containers have access to all Linux kernel capabilities and devices.
+      This policy prevents the creation of privileged containers to improve security posture.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-privileged
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Privileged containers are not allowed"
+      pattern:
+        spec:
+          =(securityContext):
+            =(privileged): "false"
+          containers:
+          - name: "*"
+            =(securityContext):
+              =(privileged): "false"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-host-network
+  annotations:
+    policies.kyverno.io/title: Restrict Host Network
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Pods that use the host network can access the node's network interfaces.
+      This policy prevents the use of host network for improved security isolation.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-host-network
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Host network is not allowed"
+      pattern:
+        spec:
+          =(hostNetwork): "false"

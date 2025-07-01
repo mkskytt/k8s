@@ -1,0 +1,59 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  url: https://kyverno.github.io/kyverno/
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kyverno
+      version: 3.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: kyverno
+  values:
+    # Enable policy reports for better observability
+    admissionController:
+      replicas: 1
+      
+    # Enable background scanning
+    backgroundController:
+      enabled: true
+      replicas: 1
+      
+    # Enable cleanup controller
+    cleanupController:
+      enabled: true
+      replicas: 1
+      
+    # Enable reports controller for policy violation reports
+    reportsController:
+      enabled: true
+      replicas: 1
+      
+    # Resource settings for production readiness
+    resources:
+      limits:
+        memory: 384Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+        
+    # Enable metrics
+    metricsService:
+      create: true
+      
+    # Pod security standards
+    podSecurityStandard: restricted

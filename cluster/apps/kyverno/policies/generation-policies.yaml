@@ -1,0 +1,154 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-default-network-policy
+  annotations:
+    policies.kyverno.io/title: Generate Default Network Policy
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Namespace
+    policies.kyverno.io/description: >-
+      Network policies provide traffic isolation and security controls at the Pod level.
+      This policy automatically generates a default network policy for new namespaces
+      that denies all ingress traffic by default, following the principle of least privilege.
+spec:
+  background: true
+  rules:
+  - name: generate-default-deny-ingress
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace
+    exclude:
+      any:
+      - resources:
+          names:
+          - kube-system
+          - kube-public
+          - kube-node-lease
+          - flux-system
+          - kyverno
+    generate:
+      synchronize: true
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      name: default-deny-ingress
+      namespace: "{{request.object.metadata.name}}"
+      data:
+        metadata:
+          labels:
+            app.kubernetes.io/managed-by: kyverno
+        spec:
+          podSelector: {}
+          policyTypes:
+          - Ingress
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-default-limit-range
+  annotations:
+    policies.kyverno.io/title: Generate Default Limit Range
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Namespace
+    policies.kyverno.io/description: >-
+      Limit ranges define default, minimum, and maximum resource constraints for Pods.
+      This policy automatically generates a default limit range for new namespaces
+      to ensure proper resource governance.
+spec:
+  background: true
+  rules:
+  - name: generate-limit-range
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace
+    exclude:
+      any:
+      - resources:
+          names:
+          - kube-system
+          - kube-public
+          - kube-node-lease
+          - flux-system
+          - kyverno
+    generate:
+      synchronize: true
+      apiVersion: v1
+      kind: LimitRange
+      name: default-limit-range
+      namespace: "{{request.object.metadata.name}}"
+      data:
+        metadata:
+          labels:
+            app.kubernetes.io/managed-by: kyverno
+        spec:
+          limits:
+          - default:
+              cpu: "500m"
+              memory: "512Mi"
+            defaultRequest:
+              cpu: "100m"
+              memory: "128Mi"
+            max:
+              cpu: "2"
+              memory: "2Gi"
+            min:
+              cpu: "50m"
+              memory: "64Mi"
+            type: Container
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-resource-quota
+  annotations:
+    policies.kyverno.io/title: Generate Resource Quota
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Namespace
+    policies.kyverno.io/description: >-
+      Resource quotas limit the total amount of resources that can be consumed 
+      in a namespace. This policy automatically generates a default resource quota
+      for new namespaces to prevent resource overconsumption.
+spec:
+  background: true
+  rules:
+  - name: generate-resource-quota
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace
+    exclude:
+      any:
+      - resources:
+          names:
+          - kube-system
+          - kube-public
+          - kube-node-lease
+          - flux-system
+          - kyverno
+    generate:
+      synchronize: true
+      apiVersion: v1
+      kind: ResourceQuota
+      name: default-resource-quota
+      namespace: "{{request.object.metadata.name}}"
+      data:
+        metadata:
+          labels:
+            app.kubernetes.io/managed-by: kyverno
+        spec:
+          hard:
+            requests.cpu: "4"
+            requests.memory: "8Gi"
+            limits.cpu: "8"
+            limits.memory: "16Gi"
+            persistentvolumeclaims: "10"
+            pods: "20"
+            services: "10"
