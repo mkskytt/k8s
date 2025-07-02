@@ -2,6 +2,8 @@
 
 This repository contains a complete Kubernetes cluster configuration managed through GitOps using Flux CD. The setup includes automated application deployment, secret management, DNS management, and monitoring capabilities.
 
+This repository is designed to be used as a template for setting up your own GitOps-managed Kubernetes cluster. You can either apply this configuration to an existing cluster or create a new cluster using the provided instructions.
+
 ## Overview
 
 This cluster configuration provides:
@@ -22,52 +24,68 @@ Before setting up the cluster, ensure you have the following tools installed:
 - **age** - Encryption tool for secrets ([installation guide](https://github.com/FiloSottile/age))
 - **sops** - Secrets OPerationS ([installation guide](https://github.com/mozilla/sops))
 - **git** - Version control
+- **kind** - Kubernetes in Docker (only if creating a new cluster) ([installation guide](https://kind.sigs.k8s.io/docs/user/quick-start/#installation))
 
 ### Kubernetes Cluster
 You need a running Kubernetes cluster. This can be:
 - A managed cluster (EKS, GKE, AKS, etc.)
-- A self-managed cluster (kubeadm, k3s, etc.)
 - A local development cluster (kind, minikube, etc.)
+- A self-managed cluster (k3s, etc.)
+
+**Recommended for development**: Use `kind` (Kubernetes in Docker) for local testing and development.
 
 ### External Dependencies
 - **Cloudflare account** with API access for DNS management
 - **GitHub repository access** for this configuration
 
+## Getting Started
+
+This repository can be used with either an existing Kubernetes cluster or a new cluster created specifically for this configuration.
+
+### Option 1: Using an Existing Cluster
+
+If you already have a Kubernetes cluster available:
+
+1. Ensure you have `kubectl` configured to access your cluster
+2. Verify cluster access: `kubectl cluster-info`
+3. Continue to the [Secret Management](#1-set-up-secret-management) section below
+
+### Option 2: Creating a New Cluster with kind
+
+If you need to create a new cluster for development or testing:
+
+```bash
+# Create a new kind cluster
+kind create cluster --name gitops-cluster
+
+# Verify the cluster is running
+kubectl cluster-info --context kind-gitops-cluster
+
+# Set the current context (if not already set)
+kubectl config use-context kind-gitops-cluster
+```
+
+**Optional**: Create a multi-node cluster for testing:
+```bash
+# Create a kind configuration file
+cat << EOF > kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+EOF
+
+# Create cluster with the configuration
+kind create cluster --name gitops-cluster --config kind-config.yaml
+```
+
 ## Cluster Bootstrap Instructions
 
-### 1. Initialize the Control Plane
+Once you have a Kubernetes cluster available (either existing or newly created), follow these steps to bootstrap GitOps management:
 
-If you're setting up a new cluster using kubeadm:
-
-```bash
-# On the control plane node
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-
-# Configure kubectl for the current user
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Install a CNI plugin (example with Flannel)
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-```
-
-### 2. Join Worker Nodes to the Cluster
-
-On each worker node, run the join command provided by `kubeadm init`:
-
-```bash
-# Example join command (use the actual command from your kubeadm init output)
-sudo kubeadm join <control-plane-ip>:6443 --token <token> \
-    --discovery-token-ca-cert-hash sha256:<hash>
-```
-
-To get the join command later:
-```bash
-kubeadm token create --print-join-command
-```
-
-### 3. Set Up Secret Management
+### 1. Set Up Secret Management
 
 Generate an Age key for secret encryption:
 
@@ -91,7 +109,7 @@ kubectl create secret generic sops-age \
     --from-file=age.agekey=age.agekey
 ```
 
-### 4. Bootstrap Flux CD
+### 2. Bootstrap Flux CD
 
 Install and configure Flux CD to manage this repository:
 
@@ -99,10 +117,11 @@ Install and configure Flux CD to manage this repository:
 # Check prerequisites
 flux check --pre
 
-# Bootstrap Flux CD with this repository
+# Bootstrap Flux CD with your repository
+# Replace <your-github-username> and <your-repository-name> with your values
 flux bootstrap github \
-    --owner=mkskytt \
-    --repository=k8s \
+    --owner=<your-github-username> \
+    --repository=<your-repository-name> \
     --branch=main \
     --path=./cluster \
     --personal
@@ -110,7 +129,9 @@ flux bootstrap github \
 
 When prompted, provide your GitHub personal access token with repository access.
 
-### 5. Verify the Setup
+**Note**: If you're using this repository as a template, make sure to update the owner and repository name to match your forked repository.
+
+### 3. Verify the Setup
 
 Check that Flux is running and syncing:
 
@@ -227,6 +248,15 @@ cluster/apps/my-app/
 ```
 
 ## Customization
+
+### Using This Repository as a Template
+
+This repository is designed to be used as a template:
+
+1. **Use GitHub's "Use this template" button** to create your own repository
+2. **Clone your new repository** locally
+3. **Update the Flux bootstrap command** with your GitHub username and repository name
+4. **Customize the configuration** for your specific needs (see below)
 
 ### For Different Environments
 
