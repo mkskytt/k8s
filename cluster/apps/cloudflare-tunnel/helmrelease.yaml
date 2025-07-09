@@ -29,6 +29,10 @@ spec:
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
     replicaCount: 2
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
