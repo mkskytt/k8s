@@ -1,0 +1,65 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kedacore
+  namespace: keda
+spec:
+  url: https://kedacore.github.io/charts
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: keda
+  namespace: keda
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: keda
+      version: ">=2.15.0"
+      sourceRef:
+        kind: HelmRepository
+        name: kedacore
+        namespace: keda
+      interval: 12h
+  values:
+    # KEDA operator configuration
+    operator:
+      # Ensure KEDA has proper RBAC permissions
+      replicaCount: 1
+      
+    # KEDA metrics server configuration  
+    metricsServer:
+      # Enable metrics server for custom metrics
+      replicaCount: 1
+      
+    # KEDA admission webhooks configuration
+    webhooks:
+      # Enable admission webhooks for validation
+      replicaCount: 1
+      
+    # Resource management
+    resources:
+      operator:
+        limits:
+          cpu: 1000m
+          memory: 1000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      metricsServer:
+        limits:
+          cpu: 1000m
+          memory: 1000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      webhooks:
+        limits:
+          cpu: 1000m
+          memory: 1000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
