@@ -169,7 +169,8 @@ cluster/
 │   ├── cloudflare-tunnel/
 │   ├── external-dns/
 │   ├── demo-app/
-│   └── grafana-alloy/
+│   ├── grafana-alloy/
+│   └── keda/
 └── apps.yaml            # Apps kustomization
 ```
 
@@ -231,6 +232,11 @@ sops secret.sops.yaml
 4. **Demo App**
    - Simple nginx application for testing
    - Demonstrates ingress and DNS integration
+
+5. **KEDA (Kubernetes Event-Driven Autoscaling)**
+   - Enables event-driven autoscaling for workloads
+   - Scales based on external metrics, queues, and custom triggers
+   - Integrates with 60+ external systems for scaling decisions
 
 ### Adding New Applications
 
