@@ -1,0 +1,123 @@
+# Advanced KEDA ScaledObject Examples for Event-Driven Autoscaling
+# These examples demonstrate different types of event-driven scaling triggers
+# that KEDA supports for various use cases
+#
+# To use these examples:
+# 1. Choose the appropriate example for your use case
+# 2. Modify the metadata and configuration as needed
+# 3. Apply with: kubectl apply -f advanced-examples.yaml
+#
+---
+# Example 1: Queue-based scaling (e.g., RabbitMQ, Azure Service Bus, AWS SQS)
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: queue-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: queue-processor
+  minReplicaCount: 0  # Scale to zero when no messages
+  maxReplicaCount: 30
+  triggers:
+  - type: rabbitmq
+    metadata:
+      protocol: amqp
+      queueName: task-queue
+      mode: QueueLength
+      value: "5"  # Scale up when more than 5 messages in queue
+    authenticationRef:
+      name: rabbitmq-auth
+---
+# Example 2: Prometheus metrics-based scaling
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: prometheus-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: api-service
+  minReplicaCount: 2
+  maxReplicaCount: 20
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:9090
+      metricName: http_requests_per_second
+      threshold: '100'
+      query: sum(rate(http_requests_total[1m]))
+---
+# Example 3: Kafka topic-based scaling
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: kafka-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: kafka-consumer
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka-bootstrap.kafka.svc.cluster.local:9092
+      consumerGroup: my-consumer-group
+      topic: events-topic
+      lagThreshold: '10'  # Scale when consumer lag > 10 messages
+---
+# Example 4: HTTP requests-based scaling using external metrics
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: http-requests-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: web-api
+  minReplicaCount: 1
+  maxReplicaCount: 25
+  triggers:
+  - type: external
+    metadata:
+      scalerAddress: http-scaler.keda.svc.cluster.local:9090
+      metricName: http_concurrent_requests
+      targetValue: '30'  # Scale when concurrent requests > 30
+---
+# Example 5: Cron-based scaling for predictable workloads
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: cron-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: batch-processor
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+  - type: cron
+    metadata:
+      timezone: UTC
+      start: "0 8 * * 1-5"  # Scale up at 8 AM on weekdays
+      end: "0 18 * * 1-5"   # Scale down at 6 PM on weekdays
+      desiredReplicas: "5"
+---
+# Example TriggerAuthentication for external services
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-auth
+  namespace: default
+spec:
+  secretTargetRef:
+  - parameter: host
+    name: rabbitmq-secret
+    key: host
+  - parameter: username
+    name: rabbitmq-secret
+    key: username
+  - parameter: password
+    name: rabbitmq-secret
+    key: password
