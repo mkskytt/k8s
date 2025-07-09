@@ -5,7 +5,8 @@ metadata:
   name: demo-app-ingress
   namespace: demo-app
   annotations:
-    cloudflare-tunnel.io/hostname: "demo.mkskytt.dev"
+    external-dns.alpha.kubernetes.io/hostname: "demo.mkskytt.dev"
+    external-dns.alpha.kubernetes.io/target: "31e83007-176a-4a06-8363-e99d39271e55.cfargotunnel.com"
 spec:
   rules:
     - host: demo.mkskytt.dev
