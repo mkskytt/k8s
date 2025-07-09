@@ -28,11 +28,17 @@ spec:
       secretName: cloudflare-tunnel-token
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
-    ingress:
-      - hostname: demo.mkskytt.dev
-        service: http://nginx-demo.demo-app.svc.cluster.local:80
-      - service: http_status:404
     replicaCount: 2
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - cloudflare-tunnel
+            topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
         cpu: 50m
