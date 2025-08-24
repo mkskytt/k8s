@@ -1,0 +1,117 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-resources
+  annotations:
+    policies.kyverno.io/title: Add Default Resources
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Deployment
+    policies.kyverno.io/description: >-
+      Resource requests and limits help ensure optimal resource utilization and prevent
+      resource starvation. This policy automatically adds default resource limits and 
+      requests to containers that don't have them specified.
+spec:
+  background: true
+  rules:
+  - name: add-default-resources
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - Deployment
+    mutate:
+      foreach:
+      - list: "request.object.spec.containers"
+        patchStrategicMerge:
+          spec:
+            containers:
+            - name: "{{ element.name }}"
+              resources:
+                limits:
+                  +(memory): "512Mi"
+                  +(cpu): "500m"
+                requests:
+                  +(memory): "128Mi"
+                  +(cpu): "100m"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-security-context
+  annotations:
+    policies.kyverno.io/title: Add Security Context
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Deployment
+    policies.kyverno.io/description: >-
+      Security contexts define privilege and access control settings for Pods and containers.
+      This policy adds default security context settings to improve security posture.
+spec:
+  background: true
+  rules:
+  - name: add-pod-security-context
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - Deployment
+    mutate:
+      patchStrategicMerge:
+        spec:
+          securityContext:
+            +(runAsNonRoot): true
+            +(runAsUser): 1000
+            +(fsGroup): 2000
+  - name: add-container-security-context
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - Deployment
+    mutate:
+      foreach:
+      - list: "request.object.spec.containers"
+        patchStrategicMerge:
+          spec:
+            containers:
+            - name: "{{ element.name }}"
+              securityContext:
+                +(allowPrivilegeEscalation): false
+                +(readOnlyRootFilesystem): true
+                +(capabilities):
+                  drop:
+                  - ALL
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-environment-label
+  annotations:
+    policies.kyverno.io/title: Add Environment Label
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/subject: Pod, Deployment, Service
+    policies.kyverno.io/description: >-
+      Environment labels help with resource organization and management.
+      This policy adds a default 'development' environment label if none is specified.
+spec:
+  background: true
+  rules:
+  - name: add-environment-label
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          - Deployment
+          - Service
+    mutate:
+      patchStrategicMerge:
+        metadata:
+          labels:
+            +(environment): "development"
