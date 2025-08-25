@@ -12,6 +12,7 @@ This cluster configuration provides:
 - **DNS management** with external-dns and Cloudflare
 - **Secure ingress** through Cloudflare tunnels
 - **Monitoring** with Grafana Alloy
+- **Policy management** with Kyverno
 - **Demo applications** for testing
 
 ## Prerequisites
@@ -170,7 +171,8 @@ cluster/
 │   ├── external-dns/
 │   ├── demo-app/
 │   ├── grafana-alloy/
-│   └── keda/
+│   ├── keda/
+│   └── kyverno/
 └── apps.yaml            # Apps kustomization
 ```
 
@@ -237,6 +239,12 @@ sops secret.sops.yaml
    - Enables event-driven autoscaling for workloads
    - Scales based on external metrics, queues, and custom triggers
    - Integrates with 60+ external systems for scaling decisions
+
+6. **Kyverno (Policy Engine)**
+   - Kubernetes-native policy management for validation, mutation, and generation
+   - Declarative policies using YAML (no complex policy language required)
+   - Admission control, background processing, and compliance reporting
+   - Supports Pod Security Standards, resource validation, and configuration generation
 
 ### Adding New Applications
 

@@ -1,0 +1,196 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  url: https://kyverno.github.io/kyverno/
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kyverno
+      version: ">=3.3.0"
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: kyverno
+      interval: 12h
+  values:
+    # Kyverno admission controller configuration
+    admissionController:
+      # Enable the admission controller
+      enabled: true
+      replicas: 1
+      
+      # Resource management
+      resources:
+        limits:
+          memory: 384Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+          
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        
+      # Container security context
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 10001
+        capabilities:
+          drop:
+            - ALL
+    
+    # Background controller configuration
+    backgroundController:
+      # Enable background controller for mutation and generation
+      enabled: true
+      replicas: 1
+      
+      # Resource management
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 100m
+          memory: 64Mi
+          
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        
+      # Container security context
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 10001
+        capabilities:
+          drop:
+            - ALL
+    
+    # Cleanup controller configuration
+    cleanupController:
+      # Enable cleanup controller for policy cleanup
+      enabled: true
+      replicas: 1
+      
+      # Resource management
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 100m
+          memory: 64Mi
+          
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        
+      # Container security context
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 10001
+        capabilities:
+          drop:
+            - ALL
+    
+    # Reports controller configuration
+    reportsController:
+      # Enable reports controller for policy reports
+      enabled: true
+      replicas: 1
+      
+      # Resource management
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 100m
+          memory: 64Mi
+          
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        
+      # Container security context
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 10001
+        capabilities:
+          drop:
+            - ALL
+    
+    # Global configuration
+    config:
+      # Enable resource filters for performance
+      resourceFilters:
+        - "[*/*,kyverno,*]"
+        - "[Event,*,*]"
+        - "[*/*,kube-system,*]"
+        - "[*/*,kube-public,*]"
+        - "[*/*,kube-node-lease,*]"
+        - "[Node,*,*]"
+        - "[APIService,*,*]"
+        - "[TokenReview,*,*]"
+        - "[SubjectAccessReview,*,*]"
+        - "[SelfSubjectAccessReview,*,*]"
+        - "[Binding,*,*]"
+        - "[ReplicaSet,*,*]"
+        - "[ReportChangeRequest,*,*]"
+        - "[ClusterReportChangeRequest,*,*]"
+        
+    # Features configuration
+    features:
+      # Enable admission reports
+      admissionReports:
+        enabled: true
+      # Enable background scan reports
+      backgroundScan:
+        enabled: true
+      # Enable config map caching
+      configMapCaching:
+        enabled: true
+      # Enable policy exceptions
+      policyExceptions:
+        enabled: true
+        
+    # Grafana configuration
+    grafana:
+      enabled: false
+      
+    # Service monitor for Prometheus (disabled by default)
+    serviceMonitor:
+      enabled: false
