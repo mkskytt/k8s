@@ -9,6 +9,7 @@ This repository is designed to be used as a template for setting up your own Git
 This cluster configuration provides:
 - **GitOps deployment** via Flux CD
 - **Secret encryption** using SOPS with Age
+- **CNI networking** with Cilium and eBPF
 - **DNS management** with external-dns and Cloudflare
 - **Secure ingress** through Cloudflare tunnels
 - **Monitoring** with Grafana Alloy
@@ -167,6 +168,7 @@ cluster/
 │   ├── gotk-sync.yaml
 │   └── kustomization.yaml
 ├── apps/                 # Application deployments
+│   ├── cilium/
 │   ├── cloudflare-tunnel/
 │   ├── external-dns/
 │   ├── demo-app/
@@ -219,28 +221,34 @@ sops secret.sops.yaml
 
 ### Included Applications
 
-1. **External DNS**
+1. **Cilium (CNI)**
+   - eBPF-based networking, security, and observability for Kubernetes
+   - High-performance CNI plugin with kernel-level packet processing
+   - Hubble observability platform for network visibility and monitoring
+   - Gateway API support and L7 application-level policies
+
+2. **External DNS**
    - Automatically manages DNS records in Cloudflare
    - Syncs Ingress and Service resources with DNS
 
-2. **Cloudflare Tunnel**
+3. **Cloudflare Tunnel**
    - Provides secure ingress to cluster services
    - Eliminates need for public load balancers
 
-3. **Grafana Alloy**
+4. **Grafana Alloy**
    - Telemetry collector for observability
    - Forwards metrics and logs to Grafana Cloud
 
-4. **Demo App**
+5. **Demo App**
    - Simple nginx application for testing
    - Demonstrates ingress and DNS integration
 
-5. **KEDA (Kubernetes Event-Driven Autoscaling)**
+6. **KEDA (Kubernetes Event-Driven Autoscaling)**
    - Enables event-driven autoscaling for workloads
    - Scales based on external metrics, queues, and custom triggers
    - Integrates with 60+ external systems for scaling decisions
 
-6. **Kyverno (Policy Engine)**
+7. **Kyverno (Policy Engine)**
    - Kubernetes-native policy management for validation, mutation, and generation
    - Declarative policies using YAML (no complex policy language required)
    - Admission control, background processing, and compliance reporting
