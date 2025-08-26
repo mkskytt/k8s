@@ -29,6 +29,35 @@ The Cilium installation is configured with:
 - **L7 Proxy**: Application-level traffic management and policies
 - **Resource Limits**: Appropriate CPU/memory limits for cluster stability
 
+### Talos Linux Integration
+
+This Cilium deployment is specifically configured for Talos Linux clusters with the following optimizations:
+
+#### IPAM Configuration
+- **Kubernetes IPAM Mode**: Uses `ipam.mode=kubernetes` as Talos assigns PodCIDRs to v1.Node resources
+- **Native Integration**: Leverages Talos' built-in Kubernetes networking capabilities
+
+#### Security Context
+- **Capability Management**: Explicitly sets required capabilities while dropping `SYS_MODULE`
+- **Talos Compliance**: Adheres to Talos security restrictions for kernel module loading
+- **Required Capabilities**: 
+  - Cilium Agent: `CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID`
+  - Clean State: `NET_ADMIN,SYS_ADMIN,SYS_RESOURCE`
+
+#### CGroup Configuration
+- **Mount Reuse**: Leverages Talos' existing cgroupv2 mount at `/sys/fs/cgroup`
+- **Auto-Mount Disabled**: Prevents conflicts with Talos' cgroup management
+- **Optimal Performance**: Reduces overhead by reusing system mounts
+
+#### Kube-Proxy Replacement
+- **KubePrism Integration**: Uses Talos' KubePrism for Kubernetes API access
+- **Local Endpoint**: Configured to use `localhost:7445` for reliable cluster communication
+- **Complete Replacement**: Replaces kube-proxy functionality with eBPF implementation
+
+#### DNS Compatibility
+- **Host Legacy Routing**: Enables `bpf.hostLegacyRouting=true` for DNS compatibility
+- **Talos DNS Forwarding**: Compatible with Talos' host DNS forwarding feature (enabled by default since Talos 1.8+)
+
 ## Flux Integration
 
 Cilium is designed to work seamlessly with Flux CD:

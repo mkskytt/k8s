@@ -30,6 +30,46 @@ spec:
       name: "k8s-cluster"
       id: 1
 
+    # Talos-specific configuration
+    # Use Kubernetes IPAM mode as Talos assigns PodCIDRs to v1.Node resources
+    ipam:
+      mode: kubernetes
+
+    # Kube-proxy replacement configuration
+    kubeProxyReplacement: true
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+
+    # Talos security context - drop SYS_MODULE capability
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+
+    # Talos cgroup configuration - reuse cgroupv2 mount
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+
+    # Enable host legacy routing for DNS compatibility with Talos
+    bpf:
+      hostLegacyRouting: true
+
     # Enable Hubble for observability
     hubble:
       enabled: true
