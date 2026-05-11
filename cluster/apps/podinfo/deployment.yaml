@@ -21,7 +21,9 @@ metadata:
   labels:
     app: podinfo
 spec:
-  replicas: 2
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: podinfo
@@ -38,9 +40,6 @@ spec:
               name: http
             - containerPort: 9999
               name: grpc
-          env:
-            - name: PODINFO_CACHE_SERVER
-              value: "redis://localhost:6379"
           volumeMounts:
             - name: data
               mountPath: /data
