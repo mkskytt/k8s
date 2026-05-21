@@ -23,7 +23,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: api
-          image: ghcr.io/mkskytt/motorinfo-api:fc45a94
+          image: ghcr.io/mkskytt/motorinfo-api:f85fdba
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -33,6 +33,17 @@ spec:
               value: http://+:8080
             - name: ASPNETCORE_ENVIRONMENT
               value: Production
+            # Pyroscope continuous profiling (CLR profiler is pre-bundled in the image)
+            - name: CORECLR_ENABLE_PROFILING
+              value: "1"
+            - name: PYROSCOPE_APPLICATION_NAME
+              value: motorinfo-api
+            - name: PYROSCOPE_SERVER_ADDRESS
+              value: https://profiles-prod-015.grafana.net
+            - name: PYROSCOPE_BASIC_AUTH_USER
+              value: "1471605"
+            - name: PYROSCOPE_LABELS
+              value: pod=$(POD_NAME),namespace=motorinfo,environment=production
             - name: OTEL_SERVICE_NAME
               value: motorinfo-api
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -56,6 +67,8 @@ spec:
           envFrom:
             - secretRef:
                 name: motorinfo-db
+            - secretRef:
+                name: pyroscope-auth
           resources:
             requests:
               cpu: 50m
