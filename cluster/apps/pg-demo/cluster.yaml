@@ -4,7 +4,7 @@ metadata:
   name: pg-demo
   namespace: pg-demo
 spec:
-  instances: 3
+  instances: 4
   storage:
     storageClass: hcloud-volumes
     size: 1Gi
@@ -23,3 +23,10 @@ spec:
   affinity:
     podAntiAffinityType: preferred
     topologyKey: kubernetes.io/hostname
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/region
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          cnpg.io/cluster: pg-demo
