@@ -29,7 +29,7 @@ spec:
       name: k8s-cluster
 
     destinations:
-      - name: grafana-cloud-metrics
+      grafanaCloudMetrics:
         type: prometheus
         url: https://prometheus-prod-22-prod-eu-west-3.grafana.net/api/prom/push
         auth:
@@ -41,7 +41,7 @@ spec:
           name: grafana-credentials
           namespace: grafana-alloy
 
-      - name: grafana-cloud-logs
+      grafanaCloudLogs:
         type: loki
         url: https://logs-prod-013.grafana.net/loki/api/v1/push
         auth:
@@ -53,7 +53,7 @@ spec:
           name: grafana-credentials
           namespace: grafana-alloy
 
-      - name: grafana-cloud-otlp-endpoint
+      grafanaCloudOTLP:
         type: otlp
         url: https://otlp-gateway-prod-eu-west-3.grafana.net/otlp
         protocol: http
@@ -79,7 +79,7 @@ spec:
           kubernetes.azure.com/set-kube-service-host-fqdn: "true"
       opencost:
         enabled: true
-        metricsSource: grafana-cloud-metrics
+        metricsSource: grafanaCloudMetrics
         opencost:
           exporter:
             defaultClusterId: k8s-cluster
