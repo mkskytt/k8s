@@ -160,7 +160,6 @@ cluster/
 ├── apps/                 # Application deployments
 │   ├── cloudflare-tunnel/
 │   ├── external-dns/
-│   ├── demo-app/
 │   ├── grafana-alloy/
 │   ├── keda/
 │   └── kyverno/
@@ -224,16 +223,12 @@ sops secret.sops.yaml
    - Telemetry collector for observability
    - Forwards metrics and logs to Grafana Cloud
 
-4. **Demo App**
-   - Simple nginx application for testing
-   - Demonstrates ingress and DNS integration
-
-5. **KEDA (Kubernetes Event-Driven Autoscaling)**
+4. **KEDA (Kubernetes Event-Driven Autoscaling)**
    - Enables event-driven autoscaling for workloads
    - Scales based on external metrics, queues, and custom triggers
    - Integrates with 60+ external systems for scaling decisions
 
-6. **Kyverno (Policy Engine)**
+5. **Kyverno (Policy Engine)**
    - Kubernetes-native policy management for validation, mutation, and generation
    - Declarative policies using YAML (no complex policy language required)
    - Admission control, background processing, and compliance reporting

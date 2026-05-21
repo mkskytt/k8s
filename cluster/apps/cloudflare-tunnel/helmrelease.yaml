@@ -28,11 +28,7 @@ spec:
       secretName: cloudflare-tunnel-token
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
-      ingress:
-        - hostname: demo.ytt.io
-          service: http://nginx-demo.demo-app.svc.cluster.local:80
-        - hostname: podinfo.ytt.io
-          service: http://podinfo.podinfo.svc.cluster.local:9898
+      ingress: []
     image:
       tag: "2026.5.0"
     replicaCount: 2
