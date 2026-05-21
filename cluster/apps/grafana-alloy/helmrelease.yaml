@@ -116,6 +116,7 @@ spec:
     collectors:
       alloy-metrics:
         enabled: true
+        presets: [clustered]
       alloy-singleton:
         enabled: true
       alloy-logs:
