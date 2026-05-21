@@ -31,6 +31,8 @@ spec:
       ingress:
         - hostname: demo.ytt.io
           service: http://nginx-demo.demo-app.svc.cluster.local:80
+        - hostname: podinfo.ytt.io
+          service: http://podinfo.podinfo.svc.cluster.local:9898
     image:
       tag: "2026.5.0"
     replicaCount: 2
