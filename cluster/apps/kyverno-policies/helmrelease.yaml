@@ -17,16 +17,14 @@ spec:
       interval: 12h
   values:
     podSecurityStandard: baseline
-    validationFailureAction: Audit
-    # Skip system + privileged-by-design namespaces — they collect noise and
-    # would never be enforced anyway. grafana-alloy needs hostPath + privileged
-    # for log collection; kube-system, kyverno, and flux-system run the
-    # platform.
+    # Enforce baseline PSS by default. The override list below holds the
+    # namespaces that legitimately need privileges (host mounts, host
+    # namespaces) to do their job and would be blocked by Enforce.
+    validationFailureAction: Enforce
     validationFailureActionOverrides:
       all:
         - action: Audit
           namespaces:
-            - kube-system
-            - kyverno
-            - flux-system
-            - grafana-alloy
+            - kube-system        # hcloud-csi-node, cluster-autoscaler, ...
+            - grafana-alloy      # log collection needs hostPath + host network
+            - system-upgrade     # k3s system-upgrade-controller
