@@ -5,6 +5,7 @@ resources:
   - backup-credentials.sops.yaml
   - db-role-secret.sops.yaml
   - db-secret.sops.yaml
+  - pyroscope-secret.sops.yaml
   - database.yaml
   - deployment-api.yaml
   - deployment-web.yaml
