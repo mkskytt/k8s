@@ -121,6 +121,7 @@ spec:
         enabled: true
       alloy-logs:
         enabled: true
+        presets: [filesystem-log-reader]
       alloy-receiver:
         enabled: true
         alloy:
