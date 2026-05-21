@@ -23,7 +23,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: web
-          image: ghcr.io/mkskytt/motorinfo-web:1c6509c
+          image: ghcr.io/mkskytt/motorinfo-web:58d8f0e
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
