@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Flux CD-managed Kubernetes cluster configuration. There is no application code, build, or test suite — every file is a Kubernetes manifest (YAML) that Flux applies to the live cluster. Changes ship by committing to `main`; Flux reconciles them automatically.
 
-The cluster runs k3s on Hetzner Cloud, provisioned by [`hetzner-k3s`](https://github.com/vitobotta/hetzner-k3s) from `cluster.yaml` at the repo root (3× cx23 masters in `nbg1`, Flannel CNI, workloads scheduled on masters). The CNI is configured at provision time — there is no Flux-managed CNI app.
+The cluster runs k3s on Hetzner Cloud, provisioned by [`hetzner-k3s`](https://github.com/vitobotta/hetzner-k3s) from `cluster.yaml` at the repo root (3× cx23 masters in `nbg1`, Flannel CNI, workloads scheduled on masters). The CNI is configured at provision time — there is no Flux-managed CNI app. The Kubernetes API is reached at `https://k8s.ytt.io:6443` (DNS A record + `api_server_hostname` adds the SAN at provision time; the LB IP fronts all 3 masters).
 
 ⚠️ `cluster.yaml` contains a Hetzner API token in plaintext and is not gitignored. Don't commit it as-is; before any push, verify it isn't staged (`git status`) or move the token out of the file.
 
