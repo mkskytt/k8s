@@ -23,7 +23,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: api
-          image: ghcr.io/mkskytt/motorinfo-api:58d8f0e
+          image: ghcr.io/mkskytt/motorinfo-api:5fa7586
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -33,6 +33,14 @@ spec:
               value: http://+:8080
             - name: ASPNETCORE_ENVIRONMENT
               value: Production
+            - name: OTEL_SERVICE_NAME
+              value: motorinfo-api
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://grafana-k8s-monitoring-alloy-receiver.grafana-alloy.svc.cluster.local:4317
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=motorinfo,deployment.environment=production
           envFrom:
             - secretRef:
                 name: motorinfo-db
