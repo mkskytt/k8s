@@ -1,0 +1,78 @@
+# Example ScaledObject for demonstrating KEDA functionality
+# This is an example that can be applied to scale workloads based on custom metrics
+# 
+# To use this example:
+# 1. Apply it to your cluster: kubectl apply -f example-scaledobject.yaml
+# 2. Deploy a workload that you want to scale
+# 3. Configure the appropriate scaler based on your metrics source
+#
+# This example shows CPU-based scaling which can be adapted for event-driven metrics
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: example-scaledobject
+  namespace: default
+spec:
+  # Target deployment to scale
+  scaleTargetRef:
+    name: example-deployment
+  # Minimum number of replicas (can be 0 for event-driven scaling)
+  minReplicaCount: 1
+  # Maximum number of replicas
+  maxReplicaCount: 10
+  # Triggers for scaling - this example uses CPU metrics
+  triggers:
+  - type: cpu
+    metadata:
+      # Scale when CPU usage exceeds 70%
+      type: Utilization
+      value: "70"
+  # Optional: Configure scaling behavior
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+---
+# Example deployment that would be scaled by the above ScaledObject
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment
+  namespace: default
+spec:
+  # Note: KEDA will manage the replica count, so this initial value will be overridden
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: app
+        image: nginx:1.21
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
