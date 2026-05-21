@@ -2,4 +2,4 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - cluster.yaml
+  # cluster.yaml is added in a follow-up commit once the CNPG CRDs are installed
