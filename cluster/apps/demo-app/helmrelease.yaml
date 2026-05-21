@@ -46,11 +46,11 @@ metadata:
   name: nginx-demo
   namespace: demo-app
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: demo.mkskytt.dev
+    external-dns.alpha.kubernetes.io/hostname: demo.ytt.io
     external-dns.alpha.kubernetes.io/target: 31e83007-176a-4a06-8363-e99d39271e55.cfargotunnel.com
 spec:
   rules:
-    - host: demo.mkskytt.dev
+    - host: demo.ytt.io
       http:
         paths:
           - path: /

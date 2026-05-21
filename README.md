@@ -7,9 +7,9 @@ This repository is designed to be used as a template for setting up your own Git
 ## Overview
 
 This cluster configuration provides:
+- **Cluster provisioning** with [hetzner-k3s](https://github.com/vitobotta/hetzner-k3s) on Hetzner Cloud (k3s + Flannel CNI)
 - **GitOps deployment** via Flux CD
 - **Secret encryption** using SOPS with Age
-- **CNI networking** with Cilium and eBPF
 - **DNS management** with external-dns and Cloudflare
 - **Secure ingress** through Cloudflare tunnels
 - **Monitoring** with Grafana Alloy
@@ -26,17 +26,14 @@ Before setting up the cluster, ensure you have the following tools installed:
 - **age** - Encryption tool for secrets ([installation guide](https://github.com/FiloSottile/age))
 - **sops** - Secrets OPerationS ([installation guide](https://github.com/mozilla/sops))
 - **git** - Version control
-- **kind** - Kubernetes in Docker (only if creating a new cluster) ([installation guide](https://kind.sigs.k8s.io/docs/user/quick-start/#installation))
+- **hetzner-k3s** - Provisions the production cluster on Hetzner Cloud ([installation guide](https://github.com/vitobotta/hetzner-k3s)) — only needed to (re)create the cluster
+- **kind** - Optional, for local development clusters ([installation guide](https://kind.sigs.k8s.io/docs/user/quick-start/#installation))
 
 ### Kubernetes Cluster
-You need a running Kubernetes cluster. This can be:
-- A managed cluster (EKS, GKE, AKS, etc.)
-- A local development cluster (kind, minikube, etc.)
-- A self-managed cluster (k3s, etc.)
-
-**Recommended for development**: Use `kind` (Kubernetes in Docker) for local testing and development.
+This repository's production cluster runs k3s on Hetzner Cloud, provisioned by `hetzner-k3s` from `cluster.yaml` at the repo root. The same Flux configuration also works against any standard Kubernetes cluster (managed, kind, k3s, etc.) if you're using this repo as a template.
 
 ### External Dependencies
+- **Hetzner Cloud account** with an API token (for cluster provisioning)
 - **Cloudflare account** with API access for DNS management
 - **GitHub repository access** for this configuration
 
@@ -52,35 +49,28 @@ If you already have a Kubernetes cluster available:
 2. Verify cluster access: `kubectl cluster-info`
 3. Continue to the [Secret Management](#1-set-up-secret-management) section below
 
-### Option 2: Creating a New Cluster with kind
+### Option 2: Creating the Hetzner k3s Cluster
 
-If you need to create a new cluster for development or testing:
+The production cluster is defined in `cluster.yaml` (3× cx23 masters in `nbg1`, k3s with Flannel CNI, private network `10.0.0.0/16`, workloads scheduled on masters).
 
 ```bash
-# Create a new kind cluster
-kind create cluster --name gitops-cluster
+# Edit cluster.yaml — set hetzner_token, SSH key paths, and allowed_networks
+# WARNING: cluster.yaml contains a Hetzner API token in plaintext.
+# Do not commit it. Add it to .gitignore or move the token to an environment
+# variable before pushing.
 
-# Verify the cluster is running
-kubectl cluster-info --context kind-gitops-cluster
-
-# Set the current context (if not already set)
-kubectl config use-context kind-gitops-cluster
+hetzner-k3s create --config cluster.yaml
 ```
 
-**Optional**: Create a multi-node cluster for testing:
-```bash
-# Create a kind configuration file
-cat << EOF > kind-config.yaml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-- role: control-plane
-- role: worker
-- role: worker
-EOF
+`hetzner-k3s` writes a kubeconfig to the `kubeconfig_path` declared in `cluster.yaml` (default `~/.kube/config`). Verify with `kubectl cluster-info`.
 
-# Create cluster with the configuration
-kind create cluster --name gitops-cluster --config kind-config.yaml
+### Option 3: Creating a Local kind Cluster
+
+For local testing of the Flux configuration without provisioning Hetzner infrastructure:
+
+```bash
+kind create cluster --name gitops-cluster
+kubectl cluster-info --context kind-gitops-cluster
 ```
 
 ## Cluster Bootstrap Instructions
@@ -168,7 +158,6 @@ cluster/
 │   ├── gotk-sync.yaml
 │   └── kustomization.yaml
 ├── apps/                 # Application deployments
-│   ├── cilium/
 │   ├── cloudflare-tunnel/
 │   ├── external-dns/
 │   ├── demo-app/
@@ -221,34 +210,30 @@ sops secret.sops.yaml
 
 ### Included Applications
 
-1. **Cilium (CNI)**
-   - eBPF-based networking, security, and observability for Kubernetes
-   - High-performance CNI plugin with kernel-level packet processing
-   - Hubble observability platform for network visibility and monitoring
-   - Gateway API support and L7 application-level policies
+> **Note**: The CNI (Flannel) is installed at the cluster level, not via Flux. The applications below are the Flux-managed workloads under `cluster/apps/`.
 
-2. **External DNS**
+1. **External DNS**
    - Automatically manages DNS records in Cloudflare
    - Syncs Ingress and Service resources with DNS
 
-3. **Cloudflare Tunnel**
+2. **Cloudflare Tunnel**
    - Provides secure ingress to cluster services
    - Eliminates need for public load balancers
 
-4. **Grafana Alloy**
+3. **Grafana Alloy**
    - Telemetry collector for observability
    - Forwards metrics and logs to Grafana Cloud
 
-5. **Demo App**
+4. **Demo App**
    - Simple nginx application for testing
    - Demonstrates ingress and DNS integration
 
-6. **KEDA (Kubernetes Event-Driven Autoscaling)**
+5. **KEDA (Kubernetes Event-Driven Autoscaling)**
    - Enables event-driven autoscaling for workloads
    - Scales based on external metrics, queues, and custom triggers
    - Integrates with 60+ external systems for scaling decisions
 
-7. **Kyverno (Policy Engine)**
+6. **Kyverno (Policy Engine)**
    - Kubernetes-native policy management for validation, mutation, and generation
    - Declarative policies using YAML (no complex policy language required)
    - Admission control, background processing, and compliance reporting
@@ -284,7 +269,7 @@ This repository is designed to be used as a template:
 
 To adapt this configuration for your environment:
 
-1. **Update domains**: Replace `mkskytt.dev` with your domain
+1. **Update domains**: Replace `ytt.io` with your domain
 2. **Modify secrets**: Update encrypted secrets with your credentials
 3. **Adjust applications**: Add, remove, or configure applications as needed
 4. **Change sync settings**: Modify sync intervals in kustomization files

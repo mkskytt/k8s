@@ -29,7 +29,7 @@ spec:
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
     ingress:
-      - hostname: demo.mkskytt.dev
+      - hostname: demo.ytt.io
         service: http://nginx-demo.demo-app.svc.cluster.local:80
     replicaCount: 2
     tolerations:

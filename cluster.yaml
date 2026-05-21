@@ -1,0 +1,37 @@
+hetzner_token: ""  # set before running hetzner-k3s; do not commit
+cluster_name: ytt
+kubeconfig_path: "~/.kube/config"
+k3s_version: v1.36.1+k3s1
+
+create_load_balancer_for_the_kubernetes_api: true
+
+networking:
+  ssh:
+    port: 22
+    use_agent: false
+    public_key_path: "~/.ssh/hetzner_k3s_ed25519.pub"
+    private_key_path: "~/.ssh/hetzner_k3s_ed25519"
+  allowed_networks:
+    ssh:
+      - 91.226.144.196/32
+    api:
+      - 91.226.144.196/32
+  public_network:
+    ipv4: true
+    ipv6: true
+  private_network:
+    enabled: true
+    subnet: 10.0.0.0/16
+  cni:
+    enabled: true
+    mode: flannel
+
+masters_pool:
+  instance_type: cx23
+  instance_count: 3
+  locations:
+    - nbg1
+    - nbg1
+    - nbg1
+
+schedule_workloads_on_masters: true
