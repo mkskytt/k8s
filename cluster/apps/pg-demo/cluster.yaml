@@ -1,0 +1,25 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-demo
+  namespace: pg-demo
+spec:
+  instances: 3
+  storage:
+    storageClass: hcloud-volumes
+    size: 1Gi
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  monitoring:
+    enablePodMonitor: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  affinity:
+    podAntiAffinityType: preferred
+    topologyKey: kubernetes.io/hostname

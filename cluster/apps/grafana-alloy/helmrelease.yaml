@@ -74,18 +74,23 @@ spec:
 
     clusterMetrics:
       enabled: true
+      collector: alloy-metrics
 
     costMetrics:
       enabled: true
+      collector: alloy-metrics
 
     clusterEvents:
       enabled: true
+      collector: alloy-singleton
 
     podLogsViaLoki:
       enabled: true
+      collector: alloy-logs
 
     applicationObservability:
       enabled: true
+      collector: alloy-receiver
       receivers:
         otlp:
           grpc:

@@ -1,0 +1,35 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cnpg
+  namespace: cnpg-system
+spec:
+  url: https://cloudnative-pg.github.io/charts
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+  namespace: cnpg-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cloudnative-pg
+      version: ">=0.28.0, <1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: cnpg
+        namespace: cnpg-system
+      interval: 12h
+  values:
+    monitoring:
+      podMonitorEnabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
