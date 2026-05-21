@@ -30,3 +30,20 @@ spec:
       labelSelector:
         matchLabels:
           cnpg.io/cluster: pg-demo
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      destinationPath: s3://ytt-pg-backups/pg-demo
+      endpointURL: https://nbg1.your-objectstorage.com
+      s3Credentials:
+        accessKeyId:
+          name: pg-demo-backup-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: pg-demo-backup-creds
+          key: SECRET_ACCESS_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+        jobs: 2
