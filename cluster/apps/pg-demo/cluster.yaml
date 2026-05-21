@@ -34,7 +34,7 @@ spec:
     retentionPolicy: 30d
     barmanObjectStore:
       destinationPath: s3://ytt-pg-backups/pg-demo
-      endpointURL: https://nbg1.your-objectstorage.com
+      endpointURL: https://fsn1.your-objectstorage.com
       s3Credentials:
         accessKeyId:
           name: pg-demo-backup-creds
