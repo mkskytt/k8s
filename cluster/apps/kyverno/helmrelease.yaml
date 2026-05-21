@@ -183,10 +183,12 @@ spec:
       # Enable config map caching
       configMapCaching:
         enabled: true
-      # Enable policy exceptions
+      # Enable policy exceptions (scoped to the kyverno namespace)
       policyExceptions:
         enabled: true
-        
+        namespace: kyverno
+
+
     # Grafana configuration
     grafana:
       enabled: false
