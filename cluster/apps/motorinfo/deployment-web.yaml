@@ -23,7 +23,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: web
-          image: ghcr.io/mkskytt/motorinfo-web:5fa7586
+          image: ghcr.io/mkskytt/motorinfo-web:304d580
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -55,6 +55,12 @@ spec:
                   fieldPath: spec.nodeName
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: service.namespace=motorinfo,service.instance.id=$(POD_NAME),deployment.environment=production,k8s.namespace.name=$(POD_NAMESPACE),k8s.pod.name=$(POD_NAME),k8s.node.name=$(NODE_NAME)
+            - name: Faro__Url
+              value: https://faro-collector-prod-eu-north-0.grafana.net/collect/7b251fdd60e01a9a62b62c776bf6e8e9
+            - name: Faro__Environment
+              value: production
+            - name: Faro__AppVersion
+              value: "1.0.0"
           envFrom:
             - secretRef:
                 name: motorinfo-db
