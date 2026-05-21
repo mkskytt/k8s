@@ -112,6 +112,11 @@ spec:
         opencost:
           exporter:
             defaultClusterId: k8s-cluster
+          prometheus:
+            existingSecretName: grafana-credentials
+            password_key: grafana-token
+            external:
+              url: https://prometheus-prod-39-prod-eu-north-0.grafana.net/api/prom
       kepler:
         deploy: true
       node-exporter:
