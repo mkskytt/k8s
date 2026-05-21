@@ -28,7 +28,9 @@ spec:
       secretName: cloudflare-tunnel-token
       tunnelName: k8s
       tunnelId: 31e83007-176a-4a06-8363-e99d39271e55
-      ingress: []
+      ingress:
+        - hostname: motorinfo.ytt.io
+          service: http://motorinfo-web.motorinfo.svc.cluster.local:80
     image:
       tag: "2026.5.0"
     replicaCount: 2

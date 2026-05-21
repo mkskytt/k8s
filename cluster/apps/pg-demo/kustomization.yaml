@@ -3,5 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - backup-credentials.sops.yaml
+  - motorinfo-role-secret.sops.yaml
   - cluster.yaml
   - scheduled-backup.yaml
+  - motorinfo-database.yaml
