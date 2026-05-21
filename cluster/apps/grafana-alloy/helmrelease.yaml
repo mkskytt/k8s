@@ -108,6 +108,7 @@ spec:
         deploy: true
       opencost:
         deploy: true
+        metricsSource: grafanaCloudMetrics
         opencost:
           exporter:
             defaultClusterId: k8s-cluster
