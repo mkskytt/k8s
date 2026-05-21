@@ -33,7 +33,7 @@ spec:
           service: http://motorinfo-web.motorinfo.svc.cluster.local:80
     image:
       tag: "2026.5.0"
-    replicaCount: 2
+    replicaCount: 4
     tolerations:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
