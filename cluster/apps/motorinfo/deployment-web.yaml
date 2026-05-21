@@ -19,6 +19,8 @@ spec:
         app.kubernetes.io/name: motorinfo
         app.kubernetes.io/component: web
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull
       containers:
         - name: web
           image: ghcr.io/mkskytt/motorinfo-web:1c6509c
