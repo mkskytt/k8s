@@ -4,6 +4,7 @@ kubeconfig_path: "~/.kube/config"
 k3s_version: v1.36.1+k3s1
 
 create_load_balancer_for_the_kubernetes_api: true
+api_server_hostname: k8s.ytt.io
 
 networking:
   ssh:
