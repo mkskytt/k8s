@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: motorinfo
+  namespace: motorinfo
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "motorinfo.ytt.io"
+    external-dns.alpha.kubernetes.io/target: "31e83007-176a-4a06-8363-e99d39271e55.cfargotunnel.com"
+spec:
+  rules:
+    - host: motorinfo.ytt.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: motorinfo-web
+                port:
+                  number: 80

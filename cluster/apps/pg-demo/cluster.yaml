@@ -12,6 +12,12 @@ spec:
     initdb:
       database: app
       owner: app
+  managed:
+    roles:
+      - name: motorinfo
+        login: true
+        passwordSecret:
+          name: motorinfo-db-credentials
   monitoring:
     enablePodMonitor: false
   resources:

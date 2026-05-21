@@ -1,0 +1,11 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: motorinfo
+  namespace: pg-demo
+spec:
+  name: motorinfo
+  owner: motorinfo
+  cluster:
+    name: pg-demo
+  reclaimPolicy: retain
