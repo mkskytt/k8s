@@ -57,7 +57,7 @@ metadata:
   name: motorinfo-db-daily
   namespace: motorinfo
 spec:
-  schedule: "0 0 3 * * *"  # 03:00 UTC daily (offset from pg-demo to spread load)
+  schedule: "0 0 3 * * *"  # 03:00 UTC daily
   backupOwnerReference: self
   cluster:
     name: motorinfo-db
