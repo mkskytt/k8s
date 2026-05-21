@@ -108,6 +108,9 @@ spec:
         deploy: true
       opencost:
         deploy: true
+        opencost:
+          exporter:
+            defaultClusterId: k8s-cluster
       kepler:
         deploy: true
       node-exporter:
