@@ -58,7 +58,7 @@ spec:
               value: motorinfo-api
             - name: PYROSCOPE_SERVER_ADDRESS
               value: https://profiles-prod-015.grafana.net
-            - name: PYROSCOPE_BASIC_AUTH_USER
+            - name: PYROSCOPE_BASIC_AUTH_USERNAME
               value: "1471605"
             - name: PYROSCOPE_LABELS
               value: pod=$(POD_NAME),namespace=motorinfo,environment=production
