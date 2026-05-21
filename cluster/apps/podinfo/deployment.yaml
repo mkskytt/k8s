@@ -22,6 +22,8 @@ metadata:
     app: podinfo
 spec:
   replicas: 2
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: podinfo
@@ -30,6 +32,13 @@ spec:
       labels:
         app: podinfo
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: podinfo
+              topologyKey: kubernetes.io/hostname
       containers:
         - name: podinfo
           image: ghcr.io/stefanprodan/podinfo:6.12.0
