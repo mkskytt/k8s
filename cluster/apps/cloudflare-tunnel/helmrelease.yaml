@@ -31,6 +31,8 @@ spec:
       ingress:
         - hostname: demo.ytt.io
           service: http://nginx-demo.demo-app.svc.cluster.local:80
+    image:
+      tag: "2026.5.0"
     replicaCount: 2
     tolerations:
       - key: node-role.kubernetes.io/control-plane
