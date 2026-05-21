@@ -35,4 +35,10 @@ masters_pool:
     - nbg1
     - nbg1
 
+worker_node_pools:
+  - name: fsn1-replica
+    instance_type: cx23
+    instance_count: 1
+    location: fsn1
+
 schedule_workloads_on_masters: true
