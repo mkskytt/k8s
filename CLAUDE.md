@@ -23,7 +23,7 @@ Three-tier Kustomization hierarchy, all driven by Flux:
 `cluster/apps/<app>/` is the only place applications live. Every app follows the same shape:
 
 - `namespace.yaml` — the app's namespace
-- `helmrelease.yaml` — usually a `HelmRepository` + `HelmRelease` pair (Flux Helm controller). Some apps (`demo-app`, `podinfo`) ship plain `Deployment`/`Service` manifests instead, despite the filename.
+- `helmrelease.yaml` — usually a `HelmRepository` + `HelmRelease` pair (Flux Helm controller). An app can also ship plain `Deployment`/`Service` manifests directly if it doesn't use a Helm chart.
 - `kustomization.yaml` — lists the files above
 - `*.sops.yaml` — SOPS-encrypted Secrets (optional)
 
@@ -84,6 +84,6 @@ When a change doesn't appear in-cluster after ~30s, start with `flux get kustomi
 ## Conventions to preserve
 
 - **Domain**: `ytt.io`. External DNS is filtered to this zone (`cluster/apps/external-dns/helmrelease.yaml`), so any new Ingress must use a hostname under it.
-- **Cloudflare Tunnel target**: tunnel ID `31e83007-176a-4a06-8363-e99d39271e55` (see `cloudflare-tunnel/helmrelease.yaml`). New public services need an entry in that HelmRelease's `ingress:` list plus an Ingress with `external-dns.alpha.kubernetes.io/target: <tunnel-id>.cfargotunnel.com` — see `cluster/apps/demo-app/ingress.yaml` for the pattern. There is no public LoadBalancer; all external traffic enters via this tunnel.
+- **Cloudflare Tunnel target**: tunnel ID `31e83007-176a-4a06-8363-e99d39271e55` (see `cloudflare-tunnel/helmrelease.yaml`). New public services need an entry in that HelmRelease's `cloudflare.ingress` list plus an Ingress with `external-dns.alpha.kubernetes.io/target: <tunnel-id>.cfargotunnel.com`. There is no public LoadBalancer; all external traffic enters via this tunnel.
 - **Pinning vs. ranges**: secret-handling charts (`external-dns`, `cloudflare-tunnel`) pin exact versions; supporting infrastructure (`keda`, `kyverno`, `grafana-k8s-monitoring`) uses `>=` ranges. Follow the existing pattern of the app you're touching rather than changing it.
 - **Helm reconcile intervals**: 5m for ingress/DNS-critical releases, 30m for everything else. Sources (`HelmRepository`) poll at 10m. Don't tighten these without reason — Flux already detects Git changes within ~30s via the `apps` Kustomization.
