@@ -21,6 +21,14 @@ spec:
     spec:
       imagePullSecrets:
         - name: ghcr-pull
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: motorinfo
+              app.kubernetes.io/component: api
       containers:
         - name: api
           image: ghcr.io/mkskytt/motorinfo-api:7de15f6
@@ -114,3 +122,15 @@ spec:
     - name: http
       port: 80
       targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: motorinfo-api
+  namespace: motorinfo
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: motorinfo
+      app.kubernetes.io/component: api
