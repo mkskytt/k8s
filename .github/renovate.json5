@@ -1,0 +1,36 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitsDisabled",
+  ],
+  timezone: "Europe/Copenhagen",
+  schedule: ["before 6am on monday"],
+  prHourlyLimit: 4,
+  prConcurrentLimit: 10,
+  flux: {
+    fileMatch: ["cluster/.+\\.yaml$"],
+  },
+  kubernetes: {
+    fileMatch: ["cluster/.+\\.yaml$"],
+  },
+  // cluster.yaml contains a Hetzner API token in plaintext (per CLAUDE.md);
+  // keep Renovate out of it entirely so it never round-trips through a PR.
+  ignorePaths: ["cluster.yaml", "**/*.sops.yaml"],
+  packageRules: [
+    {
+      matchUpdateTypes: ["minor", "patch"],
+      matchCurrentVersion: "!/^0/",
+      groupName: "all non-major dependencies",
+    },
+    {
+      matchDatasources: ["helm"],
+      // HelmRelease ranges (e.g. ">=2.15.0, <3.0.0") are intentional per
+      // CLAUDE.md's pin-vs-range convention — Flux already auto-picks them up,
+      // so suppress Renovate PRs for them. Pinned chart versions still update.
+      matchCurrentValue: "/^>=/",
+      enabled: false,
+    },
+  ],
+}

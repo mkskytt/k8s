@@ -13,15 +13,6 @@ KEDA enables event-driven autoscaling for Kubernetes workloads, allowing applica
 - **helmrelease.yaml**: Deploys KEDA using the official Helm chart from `https://kedacore.github.io/charts`
 - **kustomization.yaml**: Includes all KEDA resources for Flux management
 
-### Example Configurations
-- **example-scaledobject.yaml**: Basic CPU-based scaling example with an nginx deployment
-- **advanced-examples.yaml**: Advanced event-driven scaling examples including:
-  - Queue-based scaling (RabbitMQ)
-  - Prometheus metrics scaling
-  - Kafka consumer lag scaling
-  - HTTP request-based scaling
-  - Cron-based predictable scaling
-
 ## KEDA Configuration
 
 The KEDA installation is configured with:
