@@ -14,6 +14,7 @@ This cluster configuration provides:
 - **Secure ingress** through Cloudflare tunnels
 - **Monitoring** with Grafana Alloy
 - **Policy management** with Kyverno
+- **PostgreSQL databases** via the CloudNativePG operator
 - **Demo applications** for testing
 
 ## Prerequisites
@@ -158,11 +159,13 @@ cluster/
 │   ├── gotk-sync.yaml
 │   └── kustomization.yaml
 ├── apps/                 # Application deployments
-│   ├── cloudflare-tunnel/
-│   ├── external-dns/
-│   ├── grafana-alloy/
-│   ├── keda/
-│   └── kyverno/
+│   ├── cloudflare-tunnel/  # Secure ingress via Cloudflare Tunnel
+│   ├── cnpg/               # CloudNativePG (PostgreSQL operator)
+│   ├── external-dns/       # Cloudflare DNS sync
+│   ├── grafana-alloy/      # Telemetry → Grafana Cloud
+│   ├── kyverno/            # Policy engine
+│   ├── kyverno-policies/   # Baseline Pod Security Standards
+│   └── motorinfo/          # Demo app (web + API + database)
 └── apps.yaml            # Apps kustomization
 ```
 
@@ -223,16 +226,22 @@ sops secret.sops.yaml
    - Telemetry collector for observability
    - Forwards metrics and logs to Grafana Cloud
 
-4. **KEDA (Kubernetes Event-Driven Autoscaling)**
-   - Enables event-driven autoscaling for workloads
-   - Scales based on external metrics, queues, and custom triggers
-   - Integrates with 60+ external systems for scaling decisions
-
-5. **Kyverno (Policy Engine)**
+4. **Kyverno (Policy Engine)**
    - Kubernetes-native policy management for validation, mutation, and generation
-   - Declarative policies using YAML (no complex policy language required)
-   - Admission control, background processing, and compliance reporting
-   - Supports Pod Security Standards, resource validation, and configuration generation
+   - Runs the admission, background, cleanup, and reports controllers
+   - See `cluster/apps/kyverno/README.md` for the cluster-specific configuration
+
+5. **Kyverno Policies**
+   - Enforces the baseline Pod Security Standards across the cluster
+   - Privileged namespaces (kube-system, grafana-alloy, system-upgrade) run in Audit mode
+
+6. **CloudNativePG (cnpg)**
+   - PostgreSQL operator that manages the cluster's databases
+   - Backing store for the motorinfo demo app
+
+7. **motorinfo**
+   - Demo application: a web frontend and API backed by a CloudNativePG database
+   - Exposed at `motorinfo.ytt.io` through the Cloudflare Tunnel
 
 ### Adding New Applications
 

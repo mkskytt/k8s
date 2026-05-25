@@ -30,7 +30,7 @@ spec:
       # Enable the admission controller
       enabled: true
       replicas: 1
-      
+
       # Resource management
       resources:
         limits:
@@ -38,7 +38,7 @@ spec:
         requests:
           cpu: 100m
           memory: 128Mi
-          
+
       # Security context
       securityContext:
         runAsNonRoot: true
@@ -46,7 +46,7 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
-        
+
       # Container security context
       containerSecurityContext:
         allowPrivilegeEscalation: false
@@ -56,13 +56,13 @@ spec:
         capabilities:
           drop:
             - ALL
-    
+
     # Background controller configuration
     backgroundController:
       # Enable background controller for mutation and generation
       enabled: true
       replicas: 1
-      
+
       # Resource management
       resources:
         limits:
@@ -70,7 +70,7 @@ spec:
         requests:
           cpu: 100m
           memory: 64Mi
-          
+
       # Security context
       securityContext:
         runAsNonRoot: true
@@ -78,7 +78,7 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
-        
+
       # Container security context
       containerSecurityContext:
         allowPrivilegeEscalation: false
@@ -88,13 +88,13 @@ spec:
         capabilities:
           drop:
             - ALL
-    
+
     # Cleanup controller configuration
     cleanupController:
       # Enable cleanup controller for policy cleanup
       enabled: true
       replicas: 1
-      
+
       # Resource management
       resources:
         limits:
@@ -102,7 +102,7 @@ spec:
         requests:
           cpu: 100m
           memory: 64Mi
-          
+
       # Security context
       securityContext:
         runAsNonRoot: true
@@ -110,7 +110,7 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
-        
+
       # Container security context
       containerSecurityContext:
         allowPrivilegeEscalation: false
@@ -120,13 +120,13 @@ spec:
         capabilities:
           drop:
             - ALL
-    
+
     # Reports controller configuration
     reportsController:
       # Enable reports controller for policy reports
       enabled: true
       replicas: 1
-      
+
       # Resource management
       resources:
         limits:
@@ -134,7 +134,7 @@ spec:
         requests:
           cpu: 100m
           memory: 64Mi
-          
+
       # Security context
       securityContext:
         runAsNonRoot: true
@@ -142,7 +142,7 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
-        
+
       # Container security context
       containerSecurityContext:
         allowPrivilegeEscalation: false
@@ -152,7 +152,7 @@ spec:
         capabilities:
           drop:
             - ALL
-    
+
     # Global configuration
     config:
       # Enable resource filters for performance
@@ -171,7 +171,7 @@ spec:
         - "[ReplicaSet,*,*]"
         - "[ReportChangeRequest,*,*]"
         - "[ClusterReportChangeRequest,*,*]"
-        
+
     # Features configuration
     features:
       # Enable admission reports
@@ -192,7 +192,7 @@ spec:
     # Grafana configuration
     grafana:
       enabled: false
-      
+
     # Service monitor for Prometheus (disabled by default)
     serviceMonitor:
       enabled: false
