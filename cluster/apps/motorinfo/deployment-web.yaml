@@ -19,6 +19,7 @@ spec:
         app.kubernetes.io/name: motorinfo
         app.kubernetes.io/component: web
     spec:
+      automountServiceAccountToken: false
       imagePullSecrets:
         - name: ghcr-pull
       topologySpreadConstraints:
@@ -87,8 +88,6 @@ spec:
               value: "1.0.0"
           envFrom:
             - secretRef:
-                name: motorinfo-db
-            - secretRef:
                 name: pyroscope-auth
           resources:
             requests:
@@ -111,10 +110,17 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
