@@ -20,51 +20,22 @@ This cluster configuration provides:
 ## Architecture
 
 ```mermaid
-graph TD
-    subgraph GitHub["GitHub (github.com/mkskytt/k8s)"]
-        Repo["Git repo<br/>main branch<br/>cluster/ manifests"]
-    end
+architecture-beta
+    group hetzner(cloud)[Hetzner k3s cluster]
 
-    subgraph Hetzner["Hetzner Cloud (nbg1)"]
-        subgraph K3s["k3s cluster — 3× cx23 masters, Flannel CNI"]
-            subgraph FluxNS["flux-system namespace"]
-                Flux["Flux CD<br/>source + kustomize + helm controllers"]
-                SOPS["sops-age secret<br/>(Age private key)"]
-            end
-            subgraph Apps["cluster/apps/"]
-                ExtDNS["external-dns"]
-                Tunnel["cloudflare-tunnel<br/>(cloudflared)"]
-                Alloy["grafana-alloy"]
-                Kyverno["kyverno + policies"]
-                CNPG["CloudNativePG<br/>(PostgreSQL)"]
-                Motorinfo["motorinfo<br/>(web + API)"]
-            end
-        end
-        LB["Load Balancer<br/>k8s.ytt.io:6443"]
-    end
+    service flux(server)[Flux CD] in hetzner
+    service apps(server)[Apps] in hetzner
+    service db(database)[PostgreSQL] in hetzner
 
-    subgraph Cloudflare["Cloudflare"]
-        DNS["DNS zone<br/>ytt.io"]
-        CFTunnel["Tunnel<br/>31e83007…"]
-    end
+    service github(internet)[GitHub]
+    service cloudflare(internet)[Cloudflare]
+    service grafana(cloud)[Grafana Cloud]
 
-    GrafanaCloud["Grafana Cloud"]
-    User["External users"]
-
-    Repo -->|"watched every ~30s, SOPS-decrypted"| Flux
-    Flux -->|"applies manifests"| Apps
-    SOPS -.->|"decrypts secrets"| Flux
-
-    ExtDNS -->|"syncs records"| DNS
-    Tunnel <-->|"outbound tunnel"| CFTunnel
-    Motorinfo -->|"reads/writes"| CNPG
-    Alloy -->|"metrics + logs"| GrafanaCloud
-
-    User -->|"motorinfo.ytt.io"| DNS
-    DNS -->|"CNAME → tunnel"| CFTunnel
-    CFTunnel -->|"routes to Ingress"| Motorinfo
-
-    LB --> K3s
+    github:R --> L:flux
+    flux:R --> L:apps
+    apps:B --> T:db
+    cloudflare:B --> T:apps
+    apps:R --> L:grafana
 ```
 
 ## Prerequisites
