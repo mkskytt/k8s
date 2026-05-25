@@ -1,162 +1,48 @@
-# Kyverno Integration
+# Kyverno
 
-This directory contains the Kyverno policy engine integration for the GitOps cluster.
+Policy engine for the cluster. Two Flux HelmReleases back it, both from the
+`https://kyverno.github.io/kyverno/` chart repo:
 
-## Overview
+- **`kyverno/`** (this directory) — the Kyverno engine. Chart `kyverno`
+  (`>=3.3.0, <4.0.0`), running the admission, background, cleanup, and reports
+  controllers.
+- **`kyverno-policies/`** — the policy set. Chart `kyverno-policies`
+  (`>=3.8.0, <4.0.0`), which applies the Pod Security Standards.
 
-Kyverno is a policy engine designed for Kubernetes that can validate, mutate, and generate configurations using admission controllers and background controllers. It uses a declarative approach with YAML policies instead of requiring a domain-specific language.
+## What's configured here
 
-## Components
+- **Security context** — every controller runs non-root (`runAsUser: 10001`),
+  read-only root filesystem, all capabilities dropped, `RuntimeDefault` seccomp.
+- **Resource filters** (`config.resourceFilters`) — system and high-churn
+  resources (kube-system, `Event`, `Node`, `ReplicaSet`, the various
+  access-review kinds, …) are excluded so the admission controller doesn't
+  process them.
+- **Reports** — admission reports, background scan, and ConfigMap caching are
+  on. Policy exceptions are allowed but scoped to the `kyverno` namespace.
+- **Telemetry** — the chart's `serviceMonitor` and `grafana` integrations are
+  off; metrics flow through grafana-alloy instead.
 
-### Core Kyverno Installation
-- **namespace.yaml**: Creates the `kyverno` namespace
-- **helmrelease.yaml**: Deploys Kyverno using the official Helm chart from `https://kyverno.github.io/kyverno/`
-- **kustomization.yaml**: Includes all Kyverno resources for Flux management
+## Pod Security enforcement
 
-### Kyverno Controllers
-- **Admission Controller**: Validates and mutates resources during admission
-- **Background Controller**: Processes existing resources for mutation and generation
-- **Cleanup Controller**: Handles cleanup operations for policies
-- **Reports Controller**: Generates policy violation reports
+`kyverno-policies` enforces the **baseline** Pod Security Standard
+(`validationFailureAction: Enforce`). Namespaces that legitimately need extra
+privileges are downgraded to **Audit** in `kyverno-policies/helmrelease.yaml`:
 
-## Kyverno Configuration
+- `kube-system` — hcloud-csi-node, cluster-autoscaler, …
+- `grafana-alloy` — log collection needs hostPath + host network
+- `system-upgrade` — k3s system-upgrade-controller
 
-The Kyverno installation is configured with:
-- **Security Hardening**: Non-root containers, read-only filesystems, dropped capabilities
-- **Resource Limits**: Appropriate CPU/memory limits for cluster stability  
-- **Resource Filters**: Optimized filters to exclude system resources from processing
-- **Multi-Controller Setup**: All controllers enabled for full functionality
+When a new workload genuinely needs host access, add its namespace to that
+override list rather than relaxing the policy globally.
 
-## Flux Integration
+## Conventions
 
-Kyverno is designed to work seamlessly with Flux CD:
-- **Sync Interval**: 30m to reduce reconciliation frequency
-- **GitOps Workflow**: Kyverno configurations and policies are managed through Git
-- **Namespace Isolation**: Dedicated namespace for Kyverno components
-
-## Usage
-
-### 1. Deploy Kyverno
-Kyverno will be automatically deployed by Flux when these manifests are committed to the repository.
-
-### 2. Create a Policy
-```yaml
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: require-labels
-spec:
-  validationFailureAction: enforce
-  background: true
-  rules:
-  - name: check-labels
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "Required labels missing"
-      pattern:
-        metadata:
-          labels:
-            app: "?*"
-            version: "?*"
-```
-
-### 3. Monitor Policies
-```bash
-# Check Kyverno operator status
-kubectl get pods -n kyverno
-
-# View cluster policies
-kubectl get clusterpolicies
-
-# Check policy reports
-kubectl get polr -A
-
-# View cluster policy reports
-kubectl get cpolr
-```
-
-## Policy Types
-
-Kyverno supports three main policy types:
-
-### 1. Validation Policies
-Validate resource configurations against defined rules:
-- **Enforce Mode**: Reject non-compliant resources
-- **Audit Mode**: Log violations without blocking
-
-### 2. Mutation Policies
-Modify resources during creation or update:
-- **Strategic Merge**: Add or modify fields
-- **JSON Patch**: Precise field modifications
-- **Overlay Pattern**: Template-based modifications
-
-### 3. Generation Policies
-Create related resources automatically:
-- **ConfigMaps and Secrets**: Auto-generate configurations
-- **NetworkPolicies**: Create security policies
-- **RBAC**: Generate role bindings
-
-## Common Use Cases
-
-### Security Policies
-- **Pod Security Standards**: Enforce security contexts and capabilities
-- **Image Security**: Require signed images or specific registries
-- **Network Policies**: Auto-generate network isolation rules
-
-### Compliance Policies
-- **Resource Labels**: Require standardized labeling
-- **Resource Limits**: Enforce resource quotas
-- **Naming Conventions**: Validate naming standards
-
-### Operational Policies
-- **Configuration Injection**: Add monitoring annotations
-- **Backup Policies**: Auto-generate backup configurations
-- **Service Mesh**: Inject sidecar configurations
-
-## Best Practices
-
-1. **Start with Audit Mode**: Test policies in audit mode before enforcement
-2. **Use Resource Filters**: Exclude unnecessary resources for performance
-3. **Monitor Policy Reports**: Regularly review policy violation reports
-4. **Version Control Policies**: Store policies in Git for GitOps workflow
-5. **Test Policies**: Validate policies in development environments first
-
-## Troubleshooting
-
-```bash
-# Check Kyverno controller status
-kubectl get pods -n kyverno
-
-# View Kyverno events
-kubectl get events -n kyverno
-
-# Check specific policy status
-kubectl describe clusterpolicy <policy-name>
-
-# View admission controller logs
-kubectl logs -n kyverno -l app.kubernetes.io/component=admission-controller
-
-# Check background controller logs
-kubectl logs -n kyverno -l app.kubernetes.io/component=background-controller
-
-# View policy reports for debugging
-kubectl get polr -A -o wide
-```
-
-## Performance Considerations
-
-- **Resource Filters**: Configured to exclude system namespaces and resources
-- **Background Processing**: Enabled for efficient resource processing
-- **Caching**: ConfigMap caching enabled for improved performance
-- **Resource Limits**: Conservative limits to prevent resource exhaustion
+- Sync interval is 30m (the repo's default for non-ingress releases); the
+  `HelmRepository` polls every 10m. Git changes are still picked up within
+  ~30s by the parent `apps` Kustomization.
+- Policies ship via Git → Flux; there is no manual `kubectl apply` step.
 
 ## References
 
-- [Kyverno Official Documentation](https://kyverno.io/docs/)
-- [Kyverno Policy Library](https://kyverno.io/policies/)
-- [Kyverno Best Practices](https://kyverno.io/docs/writing-policies/best-practices/)
-- [GitOps and Policy Management](https://kyverno.io/docs/installation/gitops/)
+- [Kyverno docs](https://kyverno.io/docs/)
+- [Pod Security Standards policies](https://kyverno.io/policies/pod-security/)
