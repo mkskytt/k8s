@@ -1,0 +1,91 @@
+---
+# Default-deny all ingress in the namespace; each tier opens only what it needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: motorinfo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# Public traffic reaches the web tier only via the Cloudflare tunnel.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-from-tunnel
+  namespace: motorinfo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: motorinfo
+      app.kubernetes.io/component: web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# The API is reachable only from the web tier.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-from-web
+  namespace: motorinfo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: motorinfo
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: motorinfo
+              app.kubernetes.io/component: web
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Postgres: API clients + intra-cluster replication on 5432; the CloudNativePG
+# operator reaches the instance manager (status/probes) on 8000.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db
+  namespace: motorinfo
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: motorinfo-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: motorinfo
+              app.kubernetes.io/component: api
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: motorinfo-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000

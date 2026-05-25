@@ -10,3 +10,4 @@ resources:
   - deployment-api.yaml
   - deployment-web.yaml
   - ingress.yaml
+  - networkpolicy.yaml
