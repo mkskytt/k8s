@@ -33,7 +33,7 @@ To add a new app: create `cluster/apps/<name>/` with the four files above. The p
 
 `.sops.yaml` declares the rule: any file under `cluster/apps/` matching `*.yaml` gets the `data` and `stringData` fields encrypted with the Age recipient declared in that file. The private key lives only in the cluster as the `sops-age` secret in the `flux-system` namespace; Flux uses it at reconcile time. The matching private key for local edits is at `~/.config/sops/age/keys.txt`.
 
-Convention: encrypted files use the `.sops.yaml` suffix (e.g. `cloudflare-api-token.sops.yaml`). The `.sops.yaml` suffix is convention only — SOPS itself decides what to encrypt based on the path/regex rule, so any `*.yaml` under `cluster/apps/` with `data`/`stringData` will be encrypted when you run `sops --encrypt`.
+Convention: encrypted files use the `.sops.yaml` suffix and are named after the Secret they contain (e.g. `cloudflare-api-key.sops.yaml` holds the `cloudflare-api-key` Secret). The `.sops.yaml` suffix is convention only — SOPS itself decides what to encrypt based on the path/regex rule, so any `*.yaml` under `cluster/apps/` with `data`/`stringData` will be encrypted when you run `sops --encrypt`.
 
 Edit an existing encrypted secret in place:
 

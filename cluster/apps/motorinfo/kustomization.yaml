@@ -2,10 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - backup-credentials.sops.yaml
-  - db-role-secret.sops.yaml
-  - db-secret.sops.yaml
-  - pyroscope-secret.sops.yaml
+  - motorinfo-db-backup-creds.sops.yaml
+  - motorinfo-db-role.sops.yaml
+  - motorinfo-db.sops.yaml
+  - pyroscope-auth.sops.yaml
   - database.yaml
   - deployment-api.yaml
   - deployment-web.yaml

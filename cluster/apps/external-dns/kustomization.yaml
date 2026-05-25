@@ -2,5 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - cloudflare-api-token.sops.yaml
+  - cloudflare-api-key.sops.yaml
   - helmrelease.yaml
