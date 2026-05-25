@@ -10,20 +10,6 @@ spec:
   ref:
     branch: main
   url: https://github.com/mkskytt/k8s
-  # Verify the OpenPGP signature of the HEAD commit before reconciling.
-  # PREREQUISITES — do NOT merge this block until both are true, or source
-  # reconciliation will halt (HEAD will fail verification):
-  #   1. The flux-system/flux-git-public-keys secret exists, holding the
-  #      armored public key(s) of every identity allowed to sign main:
-  #        gpg --export --armor <KEYID> > key.asc
-  #        kubectl create secret generic flux-git-public-keys \
-  #          -n flux-system --from-file=key.asc
-  #   2. All commits landing on main are signed by one of those keys
-  #      (enable branch protection requiring signed commits on main).
-  verify:
-    mode: HEAD
-    secretRef:
-      name: flux-git-public-keys
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
