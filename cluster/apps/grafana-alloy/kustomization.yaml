@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - grafana-credentials.sops.yaml
   - helmrelease.yaml
+  - networkpolicy.yaml

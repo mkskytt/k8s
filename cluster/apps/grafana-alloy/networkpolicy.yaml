@@ -1,0 +1,40 @@
+---
+# Restrict the OTLP/Zipkin receiver so it only accepts telemetry from
+# namespaces that actually push to it, instead of every pod in the cluster.
+#
+# Selector assumption: the receiver collector is deployed by the
+# grafana-k8s-monitoring chart as "grafana-k8s-monitoring-alloy-receiver"
+# (same prefix as its Service, referenced by motorinfo's OTEL endpoint).
+# VERIFY before merge that this selector matches the running pod:
+#   kubectl -n grafana-alloy get pod \
+#     -l app.kubernetes.io/instance=grafana-k8s-monitoring-alloy-receiver
+# If the labels differ, adjust matchLabels — a non-matching selector makes
+# this policy a silent no-op. This policy only governs ingress to the
+# receiver; the other collectors and telemetry backends are untouched.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-otlp-receiver
+  namespace: grafana-alloy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alloy
+      app.kubernetes.io/instance: grafana-k8s-monitoring-alloy-receiver
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: motorinfo
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: grafana-alloy
+      ports:
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
+        - protocol: TCP
+          port: 9411
