@@ -1,5 +1,12 @@
 {
-    "features": {
-        "ghcr.io/devcontainers/features/azure-cli:1": {}
-    }
+  "name": "k8s GitOps",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers-extra/features/sops:1": {},
+    "ghcr.io/devcontainers-extra/features/age:1": {}
+  },
+  "postCreateCommand": "curl -s https://fluxcd.io/install.sh | sudo bash"
 }
