@@ -29,7 +29,9 @@ spec:
     admissionController:
       # Enable the admission controller
       enabled: true
-      replicas: 1
+      # 2 replicas: the validating webhook fails closed (failurePolicy: Fail),
+      # so a single down pod would block all pod creation cluster-wide.
+      replicas: 2
 
       # Resource management
       resources:
