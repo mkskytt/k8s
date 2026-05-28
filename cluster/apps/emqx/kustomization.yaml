@@ -5,3 +5,5 @@ resources:
   - dashboard-secret.sops.yaml
   - helmrelease.yaml
   - ingress.yaml
+  - networkpolicy.yaml
+  - poddisruptionbudget.yaml
