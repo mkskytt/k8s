@@ -31,6 +31,10 @@ spec:
       ingress:
         - hostname: motorinfo.ytt.io
           service: http://motorinfo-web.motorinfo.svc.cluster.local:80
+        - hostname: mqtt.ytt.io
+          service: http://emqx.emqx.svc.cluster.local:8083
+        - hostname: emqx.ytt.io
+          service: http://emqx.emqx.svc.cluster.local:18083
     image:
       tag: "2026.5.0"
     replicaCount: 4

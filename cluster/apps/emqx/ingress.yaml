@@ -1,0 +1,42 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emqx-mqtt
+  namespace: emqx
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "mqtt.ytt.io"
+    external-dns.alpha.kubernetes.io/target: "31e83007-176a-4a06-8363-e99d39271e55.cfargotunnel.com"
+spec:
+  rules:
+    - host: mqtt.ytt.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: emqx
+                port:
+                  number: 8083
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emqx-dashboard
+  namespace: emqx
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "emqx.ytt.io"
+    external-dns.alpha.kubernetes.io/target: "31e83007-176a-4a06-8363-e99d39271e55.cfargotunnel.com"
+spec:
+  rules:
+    - host: emqx.ytt.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: emqx
+                port:
+                  number: 18083

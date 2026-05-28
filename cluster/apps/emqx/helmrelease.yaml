@@ -1,0 +1,58 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: emqx
+  namespace: emqx
+spec:
+  url: https://repos.emqx.io/charts
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: emqx
+  namespace: emqx
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: emqx
+      version: "5.8.9"
+      sourceRef:
+        kind: HelmRepository
+        name: emqx
+        namespace: emqx
+  values:
+    replicaCount: 3
+    envFromSecret: emqx-dashboard
+    emqxConfig:
+      EMQX_CLUSTER__DISCOVERY_STRATEGY: "dns"
+      EMQX_DASHBOARD__DEFAULT_USERNAME: "admin"
+      # Pre-configure the built-in DB authenticator so an empty user list
+      # means deny-by-default. allow_anonymous was removed in EMQX 5; an
+      # unconfigured chain accepts everyone, which would be wide-open here.
+      EMQX_AUTHENTICATION__1__MECHANISM: "password_based"
+      EMQX_AUTHENTICATION__1__BACKEND: "built_in_database"
+      EMQX_AUTHENTICATION__1__USER_ID_TYPE: "username"
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClassName: hcloud-volumes
+      accessMode: ReadWriteOnce
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        memory: 1Gi
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - emqx
+            topologyKey: "kubernetes.io/hostname"
