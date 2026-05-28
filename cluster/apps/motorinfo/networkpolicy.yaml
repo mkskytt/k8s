@@ -89,3 +89,12 @@ spec:
           port: 5432
         - protocol: TCP
           port: 8000
+    # Allow Alloy (grafana-alloy ns) to scrape the postgres-exporter
+    # metrics port discovered via inheritedMetadata annotations.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: grafana-alloy
+      ports:
+        - protocol: TCP
+          port: 9187

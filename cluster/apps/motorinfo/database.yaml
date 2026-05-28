@@ -6,6 +6,15 @@ metadata:
   namespace: motorinfo
 spec:
   instances: 3
+  # Push scrape annotations to the postgres pods so Alloy's
+  # annotationAutodiscovery feature (cluster/apps/grafana-alloy) picks up
+  # the metrics endpoint that CNPG already exposes on port 9187.
+  inheritedMetadata:
+    annotations:
+      k8s.grafana.com/scrape: "true"
+      k8s.grafana.com/metrics.portName: metrics
+      k8s.grafana.com/metrics.path: /metrics
+      k8s.grafana.com/job: cnpg
   storage:
     storageClass: hcloud-volumes
     size: 1Gi
