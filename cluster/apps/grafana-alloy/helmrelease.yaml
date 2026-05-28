@@ -15,6 +15,12 @@ metadata:
   namespace: grafana-alloy
 spec:
   interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
   chart:
     spec:
       chart: k8s-monitoring
