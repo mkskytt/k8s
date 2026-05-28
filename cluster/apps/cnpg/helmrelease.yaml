@@ -25,6 +25,7 @@ spec:
         namespace: cnpg-system
       interval: 12h
   values:
+    replicaCount: 2
     monitoring:
       podMonitorEnabled: false
     resources:
@@ -33,3 +34,12 @@ spec:
         memory: 128Mi
       limits:
         memory: 256Mi
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: cloudnative-pg
+              topologyKey: kubernetes.io/hostname
