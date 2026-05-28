@@ -26,6 +26,14 @@ spec:
   values:
     replicaCount: 3
     envFromSecret: emqx-dashboard
+    # EMQX 5's Prometheus pull endpoints are on the dashboard port (18083)
+    # and are unauthenticated by default. The annotations are consumed by
+    # Alloy's annotationAutodiscovery (cluster/apps/grafana-alloy).
+    podAnnotations:
+      k8s.grafana.com/scrape: "true"
+      k8s.grafana.com/metrics.portName: "dashboard"
+      k8s.grafana.com/metrics.path: "/api/v5/prometheus/stats"
+      k8s.grafana.com/job: "emqx"
     emqxConfig:
       EMQX_CLUSTER__DISCOVERY_STRATEGY: "dns"
       EMQX_DASHBOARD__DEFAULT_USERNAME: "admin"
