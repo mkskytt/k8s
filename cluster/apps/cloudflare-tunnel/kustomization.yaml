@@ -5,3 +5,4 @@ resources:
   - cloudflare-tunnel-token.sops.yaml
   - helmrelease.yaml
   - poddisruptionbudget.yaml
+  - networkpolicy.yaml

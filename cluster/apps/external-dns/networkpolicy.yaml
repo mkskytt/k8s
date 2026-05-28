@@ -1,0 +1,13 @@
+---
+# external-dns is a pure controller — it reads Ingress objects from the
+# API server and pushes records to the Cloudflare API. Nothing in-cluster
+# initiates connections to it, so default-deny all ingress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: external-dns
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress

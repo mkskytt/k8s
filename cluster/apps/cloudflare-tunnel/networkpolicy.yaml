@@ -1,0 +1,13 @@
+---
+# cloudflared pods only initiate outbound connections to Cloudflare's edge.
+# Nothing in-cluster needs to reach them, so default-deny all ingress.
+# (kubelet liveness/readiness probes are pod-local and aren't gated by NP.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: cloudflare-tunnel
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
