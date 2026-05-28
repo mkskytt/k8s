@@ -1,0 +1,67 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: aqua
+  namespace: trivy-system
+spec:
+  url: https://aquasecurity.github.io/helm-charts/
+  interval: 10m
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: trivy-operator
+  namespace: trivy-system
+spec:
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: trivy-operator
+      version: ">=0.32.0, <1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: aqua
+        namespace: trivy-system
+      interval: 12h
+  values:
+    # Scan workloads cluster-wide except noisy system namespaces.
+    excludeNamespaces: "kube-system,trivy-system,flux-system"
+    operator:
+      replicas: 1
+      # Keep scan jobs lean — node-collector runs per node and config audit
+      # per workload, so don't pile resources on the operator itself.
+      vulnerabilityScannerEnabled: true
+      configAuditScannerEnabled: true
+      rbacAssessmentScannerEnabled: true
+      infraAssessmentScannerEnabled: true
+      # Don't scan every replicaset history; only the live revision.
+      vulnerabilityScannerScanOnlyCurrentRevisions: true
+      configAuditScannerScanOnlyCurrentRevisions: true
+      # SBOM generation eats CPU and isn't useful without a registry to push
+      # to — disable to keep scans fast.
+      sbomGenerationEnabled: false
+    # The operator pod itself.
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    # Trivy scanner jobs. Per-workload so they need to be small.
+    trivy:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          memory: 500Mi
+      # Pull the DB from the GitHub mirror to avoid Docker Hub rate limits.
+      dbRepository: ghcr.io/aquasecurity/trivy-db
+      javaDbRepository: ghcr.io/aquasecurity/trivy-java-db
