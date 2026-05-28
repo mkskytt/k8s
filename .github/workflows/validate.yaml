@@ -37,9 +37,14 @@ jobs:
               echo "::endgroup::"
               continue
             fi
+            # -skip Secret so the SOPS `sops:` field on encrypted secrets
+            # doesn't fail strict validation (it's not in the Secret schema,
+            # and the secret-guards job already ensures these files are
+            # encrypted).
             if ! echo "$out" | kubeconform \
                 -strict \
                 -ignore-missing-schemas \
+                -skip Secret \
                 -schema-location default \
                 -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
                 -summary -verbose; then
