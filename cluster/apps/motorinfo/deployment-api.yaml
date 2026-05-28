@@ -113,8 +113,15 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            # The bundled DD/Pyroscope CLR profiler writes its native loader
+            # logs here at startup; required to be writable under a read-only
+            # root filesystem or the instrumented process fails to start.
+            - name: dd-logs
+              mountPath: /var/log/datadog
       volumes:
         - name: tmp
+          emptyDir: {}
+        - name: dd-logs
           emptyDir: {}
 ---
 apiVersion: v1
