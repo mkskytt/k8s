@@ -62,6 +62,19 @@ spec:
           memory: 200Mi
         limits:
           memory: 500Mi
-      # Pull the DB from the GitHub mirror to avoid Docker Hub rate limits.
-      dbRepository: ghcr.io/aquasecurity/trivy-db
-      javaDbRepository: ghcr.io/aquasecurity/trivy-java-db
+      # Pull the scanner image and both vuln DBs from ghcr.io (their canonical
+      # home, no Docker Hub rate limits). The chart composes each image from a
+      # SEPARATE registry knob: image.registry for the scanner, dbRegistry for the
+      # DB, javaDbRegistry for the Java DB — all default to mirror.gcr.io. The
+      # previous config overrode only dbRepository to a full ghcr.io/... path,
+      # which the mirror.gcr.io dbRegistry then prefixed into the invalid path
+      # mirror.gcr.io/ghcr.io/aquasecurity/trivy-db, breaking every DB download.
+      # Pin all three registries to ghcr.io with registry-relative repositories so
+      # they compose to ghcr.io/aquasecurity/trivy{,-db,-java-db}.
+      image:
+        registry: ghcr.io
+        repository: aquasecurity/trivy
+      dbRegistry: ghcr.io
+      dbRepository: aquasecurity/trivy-db
+      javaDbRegistry: ghcr.io
+      javaDbRepository: aquasecurity/trivy-java-db
