@@ -72,6 +72,15 @@ spec:
         traces:
           enabled: true
 
+    # Scrape any Pod or Service annotated with `k8s.grafana.com/scrape: "true"`
+    # (port via `…/metrics.portName` or `…/metrics.portNumber`, path via
+    # `…/metrics.path`). This is the lightweight alternative to deploying
+    # the Prometheus Operator CRDs and lets each app declare its scrape
+    # contract alongside its own manifests.
+    annotationAutodiscovery:
+      enabled: true
+      collector: alloy-metrics
+
     clusterMetrics:
       enabled: true
       collector: alloy-metrics
