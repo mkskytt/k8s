@@ -1,0 +1,86 @@
+name: validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  kustomize:
+    name: kustomize build + kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kustomize + kubeconform
+        run: |
+          set -euo pipefail
+          KUSTOMIZE_VERSION=5.4.3
+          KUBECONFORM_VERSION=0.6.7
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+            | sudo tar -xzC /usr/local/bin kustomize
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | sudo tar -xzC /usr/local/bin kubeconform
+
+      - name: Render and validate each app
+        run: |
+          set -euo pipefail
+          fail=0
+          for d in cluster/apps/*/; do
+            app="$(basename "$d")"
+            echo "::group::$app"
+            if ! out=$(kustomize build "$d" 2>&1); then
+              echo "::error file=$d/kustomization.yaml::kustomize build failed"
+              echo "$out"
+              fail=1
+              echo "::endgroup::"
+              continue
+            fi
+            # -skip Secret so the SOPS `sops:` field on encrypted secrets
+            # doesn't fail strict validation (it's not in the Secret schema,
+            # and the secret-guards job already ensures these files are
+            # encrypted).
+            if ! echo "$out" | kubeconform \
+                -strict \
+                -ignore-missing-schemas \
+                -skip Secret \
+                -schema-location default \
+                -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+                -summary -verbose; then
+              echo "::error file=$d::kubeconform validation failed"
+              fail=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $fail
+
+  secret-guards:
+    name: secret guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject plaintext Hetzner API tokens in cluster.yaml
+        run: |
+          # hetzner-k3s places the token under `hetzner_token:`. Real tokens are
+          # long alphanumeric strings; placeholders like <YOUR_TOKEN> are fine.
+          if [ -f cluster.yaml ] && grep -Eq '^hetzner_token:[[:space:]]+[A-Za-z0-9]{40,}' cluster.yaml; then
+            echo "::error file=cluster.yaml::Plaintext Hetzner API token detected. Remove before committing — see CLAUDE.md."
+            exit 1
+          fi
+
+      - name: Reject unencrypted *.sops.yaml files
+        run: |
+          # Every file matching *.sops.yaml under cluster/apps/ must be SOPS-
+          # encrypted (the data field must show ENC[...]) — guards against
+          # forgetting `sops --encrypt --in-place`.
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            if ! grep -q 'ENC\[' "$f"; then
+              echo "::error file=$f::*.sops.yaml file is not encrypted — run 'sops --encrypt --in-place $f'."
+              fail=1
+            fi
+          done < <(find cluster/apps -name '*.sops.yaml' -type f)
+          exit $fail
