@@ -1,0 +1,34 @@
+---
+# Default-deny all ingress in cnpg-system; the rule below opens only the webhook.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: cnpg-system
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# The CloudNativePG validating/mutating webhooks fail closed, so the API server
+# must always be able to reach the operator's webhook-server port (9443) — every
+# apply of a CNPG resource (e.g. motorinfo's Cluster CR, re-applied each Flux
+# reconcile) passes through them. A rule that lists the port but no `from`
+# selector allows that single port from ANY source, which guarantees API-server
+# reachability regardless of how Flannel presents the host-network source IP,
+# while every other port stays denied. The endpoint is TLS-client-authenticated.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webhook
+  namespace: cnpg-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 9443

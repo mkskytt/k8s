@@ -1,0 +1,35 @@
+---
+# Trivy's node-collector inspects each node's host (kernel params, file
+# permissions, etc.) and therefore legitimately needs hostPID and hostPath —
+# which the cluster-wide baseline Kyverno policies disallow-host-namespaces and
+# disallow-host-path block in Enforce mode. Without this exception the
+# node-collector Jobs are denied at admission and no infra-assessment reports
+# are ever produced. The exception is scoped to node-collector-* workloads in
+# trivy-system only; every other pod in the namespace stays baseline-enforced.
+# PolicyExceptions are read only from the kyverno namespace
+# (features.policyExceptions.namespace in the kyverno HelmRelease).
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: trivy-node-collector
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: disallow-host-namespaces
+      ruleNames:
+        - host-namespaces
+        - autogen-host-namespaces
+    - policyName: disallow-host-path
+      ruleNames:
+        - host-path
+        - autogen-host-path
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - Job
+          namespaces:
+            - trivy-system
+          names:
+            - node-collector-*
