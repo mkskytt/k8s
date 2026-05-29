@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - cloudflare-tunnel-token.sops.yaml
   - helmrelease.yaml
+  - poddisruptionbudget.yaml
