@@ -11,3 +11,89 @@ spec:
   podSelector: {}
   policyTypes:
     - Ingress
+---
+# Default-deny all egress; the allow-egress policy below enumerates the only
+# destinations cloudflared may reach.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: cloudflare-tunnel
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+---
+# cloudflared dials OUT to the Cloudflare edge and forwards requests to the
+# in-cluster services named in its tunnel ingress config (helmrelease.yaml).
+# It does NOT watch the Kubernetes API (config comes from a ConfigMap), so no
+# API-server egress. Lead with DNS — without it cloudflared can't resolve the
+# edge hostnames (regionN.v2.argotunnel.com) or the backend Services.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: cloudflare-tunnel
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Cloudflare edge: QUIC (UDP 7844) primary, HTTP/2 (TCP 7844) and HTTPS
+    # (TCP 443) fallbacks. Scoped to public IPs (FQDN/edge-CIDR egress isn't
+    # expressible on kube-router, and pinning Cloudflare CIDRs risks the tunnel
+    # breaking if they change); private ranges are excluded.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: UDP
+          port: 7844
+        - protocol: TCP
+          port: 7844
+        - protocol: TCP
+          port: 443
+    # Backend it proxies: motorinfo-web (motorinfo.ytt.io -> :8080)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: motorinfo
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: motorinfo
+              app.kubernetes.io/component: web
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Backends it proxies: EMQX WebSocket (mqtt.ytt.io -> :8083) and
+    # dashboard (emqx.ytt.io -> :18083)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: emqx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: emqx
+      ports:
+        - protocol: TCP
+          port: 8083
+        - protocol: TCP
+          port: 18083
