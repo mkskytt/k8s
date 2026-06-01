@@ -3,6 +3,10 @@ kind: Namespace
 metadata:
   name: trivy-system
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    # The Trivy node-collector needs hostPID + hostPath to inspect each node, so
+    # PSA enforce must permit it. Kyverno still enforces baseline on every other
+    # pod here (trivy-system is NOT in the Audit override list); only the
+    # node-collector is exempted, narrowly, via the PolicyException in this app.
+    pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/audit: restricted

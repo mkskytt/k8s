@@ -1,16 +1,45 @@
 ---
-# Restrict the OTLP/Zipkin receiver so it only accepts telemetry from
-# namespaces that actually push to it, instead of every pod in the cluster.
+# Default-deny all ingress in grafana-alloy. Previously this namespace had only
+# the (broken, no-op) receiver policy below and therefore accepted ingress from
+# every pod in the cluster. The rules below restore that to: free intra-namespace
+# traffic (the collectors scrape and cluster among themselves) plus the one
+# legitimate cross-namespace path — motorinfo pushing OTLP to the receiver.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: grafana-alloy
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# The monitoring stack is a dense intra-namespace mesh: alloy-metrics scrapes
+# kube-state-metrics / node-exporter / kepler / opencost, the alloy collectors
+# cluster with each other on 12345, etc. Allow all ingress that originates from
+# within grafana-alloy itself so none of that internal wiring breaks; only
+# cross-namespace ingress is now constrained.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-namespace
+  namespace: grafana-alloy
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: grafana-alloy
+---
+# The OTLP/Zipkin receiver accepts telemetry pushed from motorinfo (intra-namespace
+# senders are already covered by allow-intra-namespace above).
 #
-# Selector assumption: the receiver collector is deployed by the
-# grafana-k8s-monitoring chart as "grafana-k8s-monitoring-alloy-receiver"
-# (same prefix as its Service, referenced by motorinfo's OTEL endpoint).
-# VERIFY before merge that this selector matches the running pod:
-#   kubectl -n grafana-alloy get pod \
-#     -l app.kubernetes.io/instance=grafana-k8s-monitoring-alloy-receiver
-# If the labels differ, adjust matchLabels — a non-matching selector makes
-# this policy a silent no-op. This policy only governs ingress to the
-# receiver; the other collectors and telemetry backends are untouched.
+# Selector fix: the receiver pods carry app.kubernetes.io/name=alloy-receiver
+# (verified live), NOT "alloy" as the previous revision assumed — that mismatch
+# selected zero pods and made the policy a silent no-op.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -19,7 +48,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: alloy
+      app.kubernetes.io/name: alloy-receiver
       app.kubernetes.io/instance: grafana-k8s-monitoring-alloy-receiver
   policyTypes:
     - Ingress
@@ -28,9 +57,6 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: motorinfo
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: grafana-alloy
       ports:
         - protocol: TCP
           port: 4317

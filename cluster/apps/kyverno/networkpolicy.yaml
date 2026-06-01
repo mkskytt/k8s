@@ -1,0 +1,42 @@
+---
+# Default-deny all ingress in the kyverno namespace; the rule below opens only
+# the admission/cleanup webhook port. The chart's own networkPolicy.enabled
+# option was deliberately NOT used: it renders `ingress: [{}]` (allow-all), which
+# is a no-op masquerading as a policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: kyverno
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# The admission and cleanup controllers both back webhooks with failurePolicy:
+# Fail — the admission one gates ALL pod creation cluster-wide — so the API
+# server must always reach their https port (9443). The API server runs on the
+# masters' host network and presents an unselectable source IP under Flannel, so
+# matching it with pod/namespace selectors is impossible; a rule that lists the
+# port with no `from` allows 9443 from ANY source, guaranteeing reachability
+# while every other port (e.g. metrics 8000) stays denied. The endpoint is
+# TLS-client-authenticated by the API server.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webhooks
+  namespace: kyverno
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - admission-controller
+          - cleanup-controller
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 9443

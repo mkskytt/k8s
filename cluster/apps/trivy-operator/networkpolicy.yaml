@@ -1,0 +1,14 @@
+---
+# trivy-operator is a controller: it reads the API server and writes report CRs,
+# while its scan Jobs and the node-collector only initiate outbound connections.
+# Nothing in-cluster connects to it — metrics scraping is off (podMonitor
+# disabled, no scrape annotation) — so default-deny all ingress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: trivy-system
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
