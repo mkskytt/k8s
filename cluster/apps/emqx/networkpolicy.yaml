@@ -74,3 +74,48 @@ spec:
       ports:
         - protocol: TCP
           port: 18083
+---
+# Default-deny all egress; the allow-egress policy below enumerates the only
+# destinations EMQX may reach.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: emqx
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+---
+# EMQX is a broker — clients connect IN, and it initiates almost nothing
+# outbound. It needs DNS (cluster discovery uses EMQX_CLUSTER__DISCOVERY_STRATEGY
+# = dns, resolving the headless service) and intra-namespace Mria/RLOG cluster
+# RPC between broker pods. No external or API-server egress. Lead with DNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: emqx
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Intra-namespace EMQX cluster RPC (Mria/RLOG) between broker pods
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: emqx

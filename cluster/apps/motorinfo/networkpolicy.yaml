@@ -98,3 +98,90 @@ spec:
       ports:
         - protocol: TCP
           port: 9187
+---
+# Default-deny all egress; the allow-egress policy below enumerates the only
+# destinations any motorinfo pod may reach. Applied namespace-wide (union of
+# web/api/db needs) rather than per-tier to avoid a missed allow silently
+# breaking a pod — intra-namespace traffic is permitted anyway.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: motorinfo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+---
+# Egress destinations:
+#  - DNS (lead with it — a missing DNS allow breaks every pod and looks down)
+#  - intra-namespace: web->api (8080), api->db (5432), CNPG replication
+#  - Kubernetes API server: the CNPG instance manager in the DB pods needs it
+#  - Alloy OTLP receiver (4317/4318) for app telemetry
+#  - public HTTPS: Pyroscope + Faro (Grafana Cloud) and the S3 backup endpoint
+#    (fsn1.your-objectstorage.com) — FQDN egress isn't expressible on
+#    kube-router, so scope to public IPs on 443, excluding private ranges.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: motorinfo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Intra-namespace (web->api, api->db, Postgres replication)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: motorinfo
+    # Kubernetes API server (CNPG instance manager): service VIP + control-plane
+    # nodes' host-network endpoint (post-DNAT destination under Flannel).
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/16
+      ports:
+        - protocol: TCP
+          port: 6443
+    # OTLP telemetry to the Alloy receiver
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: grafana-alloy
+      ports:
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
+    # Public HTTPS: Grafana Cloud (Pyroscope/Faro) + S3 backups (Hetzner)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

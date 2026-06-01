@@ -11,3 +11,69 @@ spec:
   podSelector: {}
   policyTypes:
     - Ingress
+---
+# Default-deny all egress; the allow-egress policy below enumerates the only
+# destinations external-dns may reach.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: external-dns
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+---
+# external-dns needs: DNS resolution, the Kubernetes API (to watch Ingress /
+# Service objects), and the public Cloudflare API over HTTPS. Lead with DNS —
+# omitting it breaks name resolution for every pod and looks like an outage.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: external-dns
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Kubernetes API server: the in-cluster service VIP and the control-plane
+    # nodes' host-network endpoint (post-DNAT destination under Flannel).
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/16
+      ports:
+        - protocol: TCP
+          port: 6443
+    # Public HTTPS — the Cloudflare API (FQDN egress is not expressible on
+    # kube-router, so scope to public IPs on 443, excluding all private ranges).
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
